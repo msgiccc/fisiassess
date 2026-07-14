@@ -3,16 +3,49 @@ import { Link, useNavigate } from 'react-router-dom';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { useAuthStore } from '../store/authStore';
+import { supabase } from '../lib/supabase';
+import toast from 'react-hot-toast';
 
 export default function Login() {
-  const [role, setRole] = useState<'guru' | 'siswa'>('siswa');
-  const login = useAuthStore(state => state.login);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const initialize = useAuthStore(state => state.initialize);
   const navigate = useNavigate();
 
-  const handleMockLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    login({ id: '1', name: role === 'guru' ? 'Pak Budi' : 'Andi', role });
-    navigate(role === 'guru' ? '/dashboard' : '/dashboard-siswa');
+    setLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      await initialize();
+      
+      // Determine redirect based on profile role (fallback to dashboard-siswa)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+        
+      if (profile?.role === 'guru') {
+        navigate('/dashboard');
+      } else {
+        navigate('/dashboard-siswa');
+      }
+      
+      toast.success('Berhasil login!');
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal login.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -27,38 +60,32 @@ export default function Login() {
           <h2 className="text-xl text-gray-400">Selamat datang kembali</h2>
         </div>
 
-        <form onSubmit={handleMockLogin} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Login Sebagai</label>
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setRole('siswa')}
-                className={`py-2 rounded-xl border transition-all ${role === 'siswa' ? 'bg-primary-glow/20 border-primary-glow text-white' : 'glass-effect text-gray-400 hover:text-white'}`}
-              >
-                Siswa
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('guru')}
-                className={`py-2 rounded-xl border transition-all ${role === 'guru' ? 'bg-secondary-glow/20 border-secondary-glow text-white' : 'glass-effect text-gray-400 hover:text-white'}`}
-              >
-                Guru
-              </button>
-            </div>
-          </div>
-
+        <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-4">
             <div>
-              <input type="email" placeholder="Email" className="glass-input w-full" required />
+              <input 
+                type="email" 
+                placeholder="Email" 
+                className="glass-input w-full" 
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required 
+              />
             </div>
             <div>
-              <input type="password" placeholder="Password" className="glass-input w-full" required />
+              <input 
+                type="password" 
+                placeholder="Password" 
+                className="glass-input w-full" 
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required 
+              />
             </div>
           </div>
 
-          <GlassButton type="submit" variant="primary" className="w-full text-lg mt-4">
-            Masuk
+          <GlassButton type="submit" variant="primary" className="w-full text-lg mt-4" disabled={loading}>
+            {loading ? 'Memproses...' : 'Masuk'}
           </GlassButton>
         </form>
 

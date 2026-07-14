@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { useAuthStore } from './store/authStore';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -11,6 +13,12 @@ import HasilSoal from './pages/HasilSoal';
 import Tentang from './pages/Tentang';
 
 function App() {
+  const initialize = useAuthStore(state => state.initialize);
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
   return (
     <>
       <Toaster 

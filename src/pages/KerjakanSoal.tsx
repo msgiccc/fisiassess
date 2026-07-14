@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { Send } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useAuthStore } from '../store/authStore';
+import { evaluateAnswer } from '../lib/openrouter';
+import toast from 'react-hot-toast';
 
 export default function KerjakanSoal() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
+  
+  const [soal, setSoal] = useState<any>(null);
+  const [loadingSoal, setLoadingSoal] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [jawaban, setJawaban] = useState({
     verbal: '',
     matematik: '',
@@ -15,15 +25,100 @@ export default function KerjakanSoal() {
     visual: '',
   });
 
+  useEffect(() => {
+    if (id) fetchSoal(id);
+  }, [id]);
+
+  const fetchSoal = async (soalId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('assessment_soal')
+        .select(`*, profiles:guru_id ( nama )`)
+        .eq('id', soalId)
+        .single();
+        
+      if (error) throw error;
+      setSoal(data);
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal memuat soal.');
+    } finally {
+      setLoadingSoal(false);
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setJawaban({ ...jawaban, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate API call and redirect to result
-    navigate(`/hasil/${id}`);
+    if (!user || !soal) return;
+    
+    setIsSubmitting(true);
+    const toastId = toast.loading('Sedang mengevaluasi jawaban dengan AI... (Ini mungkin memakan waktu beberapa detik)');
+    
+    try {
+      // Panggil OpenRouter API untuk ke-4 representasi secara paralel
+      const [hasilVerbal, hasilMatematik, hasilGrafik, hasilVisual] = await Promise.all([
+        evaluateAnswer(soal.soal_text, soal.kunci_verbal, jawaban.verbal, "Verbal"),
+        evaluateAnswer(soal.soal_text, soal.kunci_matematik, jawaban.matematik, "Matematik"),
+        evaluateAnswer(soal.soal_text, soal.kunci_grafik, jawaban.grafik, "Grafik"),
+        evaluateAnswer(soal.soal_text, soal.kunci_visual, jawaban.visual, "Visual / Fisik"),
+      ]);
+
+      const feedbackString = JSON.stringify({
+        verbal: hasilVerbal.feedback,
+        matematik: hasilMatematik.feedback,
+        grafik: hasilGrafik.feedback,
+        visual: hasilVisual.feedback,
+      });
+
+      // Simpan hasil ke Supabase
+      const { error } = await supabase.from('assessment_jawaban').insert([
+        {
+          soal_id: soal.id,
+          siswa_id: user.id,
+          jawaban_verbal: jawaban.verbal,
+          jawaban_matematik: jawaban.matematik,
+          jawaban_grafik: jawaban.grafik,
+          jawaban_visual: jawaban.visual,
+          skor_verbal: hasilVerbal.skor,
+          skor_matematik: hasilMatematik.skor,
+          skor_grafik: hasilGrafik.skor,
+          skor_visual: hasilVisual.skor,
+          feedback: feedbackString,
+        }
+      ]);
+
+      if (error) throw error;
+
+      toast.success('Evaluasi selesai!', { id: toastId });
+      navigate(`/hasil/${soal.id}`);
+      
+    } catch (error: any) {
+      console.error(error);
+      toast.error('Gagal memproses atau menyimpan jawaban.', { id: toastId });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (loadingSoal) {
+    return (
+      <DashboardLayout>
+        <p className="text-gray-400 p-8">Memuat soal...</p>
+      </DashboardLayout>
+    );
+  }
+
+  if (!soal) {
+    return (
+      <DashboardLayout>
+        <p className="text-red-400 p-8">Soal tidak ditemukan.</p>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -31,19 +126,12 @@ export default function KerjakanSoal() {
         <GlassCard className="mb-8 border-primary-glow/30">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h1 className="text-2xl font-bold mb-1">Hukum Newton (Dinamika Partikel)</h1>
-              <p className="text-sm text-gray-400">Topik: Mekanika | Guru: Pak Budi</p>
-            </div>
-            <div className="text-right">
-              <div className="text-sm text-warning flex items-center">
-                <span className="w-2 h-2 rounded-full bg-warning mr-2 animate-pulse" />
-                Sisa Waktu: 45:00
-              </div>
+              <h1 className="text-2xl font-bold mb-1">{soal.judul}</h1>
+              <p className="text-sm text-gray-400">Topik: {soal.topik} | Guru: {soal.profiles?.nama || 'Guru'}</p>
             </div>
           </div>
-          <div className="bg-white/5 rounded-xl p-4 text-gray-200">
-            Sebuah balok bermassa 5 kg berada di atas bidang miring licin dengan sudut kemiringan 30 derajat terhadap horizontal. 
-            Jelaskan gaya-gaya yang bekerja pada balok tersebut, hitung percepatannya, gambarkan grafik kecepatan terhadap waktu, dan gambarkan diagram gaya (Free-Body Diagram)!
+          <div className="bg-white/5 rounded-xl p-4 text-gray-200 whitespace-pre-wrap">
+            {soal.soal_text}
           </div>
         </GlassCard>
 
@@ -82,8 +170,8 @@ export default function KerjakanSoal() {
           </GlassCard>
 
           <div className="flex justify-end pt-4">
-            <GlassButton type="submit" variant="primary" className="flex items-center space-x-2 px-8">
-              <span>Kirim Jawaban & Evaluasi</span>
+            <GlassButton type="submit" variant="primary" className="flex items-center space-x-2 px-8" disabled={isSubmitting}>
+              <span>{isSubmitting ? 'Mengevaluasi...' : 'Kirim Jawaban & Evaluasi'}</span>
               <Send className="w-5 h-5 ml-2" />
             </GlassButton>
           </div>

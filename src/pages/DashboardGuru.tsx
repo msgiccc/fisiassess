@@ -1,18 +1,40 @@
+import { useEffect, useState } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
 import { useAuthStore } from '../store/authStore';
+import { supabase } from '../lib/supabase';
 import { Users, BookOpen, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 export default function DashboardGuru() {
   const { user } = useAuthStore();
+  const [soalList, setSoalList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const mockSoal = [
-    { id: 1, judul: 'Hukum Newton', kelas: 'X IPA 1', topik: 'Mekanika', status: 'Aktif' },
-    { id: 2, judul: 'Gerak Lurus Beraturan', kelas: 'X IPA 2', topik: 'Kinematika', status: 'Aktif' },
-    { id: 3, judul: 'Termodinamika Gas Ideal', kelas: 'XI IPA 1', topik: 'Termodinamika', status: 'Draft' },
-  ];
+  useEffect(() => {
+    if (user?.id) {
+      fetchSoal();
+    }
+  }, [user]);
+
+  const fetchSoal = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('assessment_soal')
+        .select('*')
+        .eq('guru_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSoalList(data || []);
+    } catch (error: any) {
+      console.error(error);
+      toast.error('Gagal mengambil data soal dari database.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -28,7 +50,7 @@ export default function DashboardGuru() {
           </div>
           <div>
             <p className="text-gray-400 text-sm">Total Soal</p>
-            <p className="text-2xl font-bold">12</p>
+            <p className="text-2xl font-bold">{loading ? '-' : soalList.length}</p>
           </div>
         </GlassCard>
         
@@ -38,7 +60,7 @@ export default function DashboardGuru() {
           </div>
           <div>
             <p className="text-gray-400 text-sm">Total Siswa</p>
-            <p className="text-2xl font-bold">145</p>
+            <p className="text-2xl font-bold">-</p>
           </div>
         </GlassCard>
 
@@ -48,7 +70,7 @@ export default function DashboardGuru() {
           </div>
           <div>
             <p className="text-gray-400 text-sm">Rata-rata Skor</p>
-            <p className="text-2xl font-bold">78.5</p>
+            <p className="text-2xl font-bold">-</p>
           </div>
         </GlassCard>
       </div>
@@ -73,26 +95,36 @@ export default function DashboardGuru() {
               </tr>
             </thead>
             <tbody>
-              {mockSoal.map((soal) => (
-                <tr key={soal.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                  <td className="py-4 px-4">{soal.judul}</td>
-                  <td className="py-4 px-4 text-gray-300">{soal.kelas}</td>
-                  <td className="py-4 px-4 text-gray-300">{soal.topik}</td>
-                  <td className="py-4 px-4">
-                    <span className={`px-3 py-1 rounded-full text-xs ${soal.status === 'Aktif' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                      {soal.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 text-right">
-                    <button 
-                      onClick={() => toast('Halaman detail soal segera hadir!', { icon: '🚧' })}
-                      className="text-primary-glow text-sm hover:underline"
-                    >
-                      Lihat Detail
-                    </button>
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="py-4 text-center text-gray-400">Memuat data...</td>
                 </tr>
-              ))}
+              ) : soalList.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-4 text-center text-gray-400">Belum ada soal yang dibuat.</td>
+                </tr>
+              ) : (
+                soalList.map((soal) => (
+                  <tr key={soal.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td className="py-4 px-4">{soal.judul}</td>
+                    <td className="py-4 px-4 text-gray-300">{soal.kelas || '-'}</td>
+                    <td className="py-4 px-4 text-gray-300">{soal.topik}</td>
+                    <td className="py-4 px-4">
+                      <span className={`px-3 py-1 rounded-full text-xs ${soal.aktif ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                        {soal.aktif ? 'Aktif' : 'Draft'}
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 text-right">
+                      <button 
+                        onClick={() => toast('Halaman detail soal segera hadir!', { icon: '🚧' })}
+                        className="text-primary-glow text-sm hover:underline"
+                      >
+                        Lihat Detail
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

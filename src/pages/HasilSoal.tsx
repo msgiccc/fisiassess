@@ -1,22 +1,81 @@
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { supabase } from '../lib/supabase';
+import toast from 'react-hot-toast';
 
 export default function HasilSoal() {
   const { id } = useParams();
   const { user } = useAuthStore();
+  const [loading, setLoading] = useState(true);
+  
+  const [soal, setSoal] = useState<any>(null);
+  const [jawaban, setJawaban] = useState<any>(null);
+  const [feedbacks, setFeedbacks] = useState<any>({});
+
+  useEffect(() => {
+    if (id && user) {
+      fetchHasil();
+    }
+  }, [id, user]);
+
+  const fetchHasil = async () => {
+    try {
+      // 1. Fetch Soal
+      const { data: soalData, error: soalError } = await supabase
+        .from('assessment_soal')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (soalError) throw soalError;
+      setSoal(soalData);
+
+      // 2. Fetch Jawaban
+      // Jika guru, mungkin lihat berdasarkan id yang berbeda, tapi untuk MVP kita ambil jawaban user saat ini
+      const { data: jawabanData, error: jawabanError } = await supabase
+        .from('assessment_jawaban')
+        .select('*')
+        .eq('soal_id', id)
+        .eq('siswa_id', user?.id)
+        .single();
+
+      if (jawabanError) {
+        // Mungkin ini guru yang melihat hasil siswa, idealnya parameter URL harus mencakup siswa_id
+        // Untuk MVP, anggap kita hanya lihat jawaban milik user yg login
+        throw jawabanError;
+      }
+      
+      setJawaban(jawabanData);
+      if (jawabanData.feedback) {
+        setFeedbacks(JSON.parse(jawabanData.feedback));
+      }
+
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal memuat hasil atau belum dikerjakan.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <DashboardLayout><p className="p-8">Memuat hasil evaluasi...</p></DashboardLayout>;
+  if (!jawaban) return <DashboardLayout><p className="p-8 text-red-400">Hasil tidak ditemukan.</p></DashboardLayout>;
 
   const data = [
-    { representasi: 'Verbal', skor: 85, fullMark: 100 },
-    { representasi: 'Matematik', skor: 90, fullMark: 100 },
-    { representasi: 'Grafik', skor: 65, fullMark: 100 },
-    { representasi: 'Visual', skor: 75, fullMark: 100 },
+    { representasi: 'Verbal', skor: jawaban.skor_verbal, fullMark: 100 },
+    { representasi: 'Matematik', skor: jawaban.skor_matematik, fullMark: 100 },
+    { representasi: 'Grafik', skor: jawaban.skor_grafik, fullMark: 100 },
+    { representasi: 'Visual', skor: jawaban.skor_visual, fullMark: 100 },
   ];
 
-  const totalScore = Math.round((85 + 90 + 65 + 75) / 4);
+  const totalScore = Math.round(
+    (jawaban.skor_verbal + jawaban.skor_matematik + jawaban.skor_grafik + jawaban.skor_visual) / 4
+  );
 
   return (
     <DashboardLayout>
@@ -25,7 +84,7 @@ export default function HasilSoal() {
           <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Dashboard
         </Link>
 
-        <h1 className="text-3xl font-bold mb-2">Hasil Evaluasi AI: Hukum Newton</h1>
+        <h1 className="text-3xl font-bold mb-2">Hasil Evaluasi AI: {soal?.judul}</h1>
         <p className="text-gray-400 mb-8">Dianalisis secara otomatis berdasarkan 4 representasi fisika.</p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -59,10 +118,10 @@ export default function HasilSoal() {
                 <h3 className="text-lg font-semibold flex items-center">
                   <span className="w-3 h-3 rounded-full bg-primary-glow mr-3"></span> Verbal
                 </h3>
-                <span className="text-xl font-bold text-primary-glow">85/100</span>
+                <span className="text-xl font-bold text-primary-glow">{jawaban.skor_verbal}/100</span>
               </div>
               <p className="text-gray-300 text-sm leading-relaxed bg-white/5 p-4 rounded-xl">
-                Jawaban sudah baik. Anda berhasil mengidentifikasi bahwa terdapat gaya berat dan gaya normal. Namun, penjelasan mengenai gaya gesek (karena bidang licin maka tidak ada) sebaiknya ditegaskan.
+                {feedbacks.verbal || 'Tidak ada feedback.'}
               </p>
             </GlassCard>
 
@@ -71,10 +130,10 @@ export default function HasilSoal() {
                 <h3 className="text-lg font-semibold flex items-center">
                   <span className="w-3 h-3 rounded-full bg-secondary-glow mr-3"></span> Matematik
                 </h3>
-                <span className="text-xl font-bold text-secondary-glow">90/100</span>
+                <span className="text-xl font-bold text-secondary-glow">{jawaban.skor_matematik}/100</span>
               </div>
               <p className="text-gray-300 text-sm leading-relaxed bg-white/5 p-4 rounded-xl">
-                Penurunan rumus \( \Sigma F = m \cdot a \) dan komponen gaya \( w \sin \theta = m \cdot a \) sangat tepat. Perhitungan matematis percepatan \( a = 10 \cdot \sin 30^\circ = 5 \) m/s² sepenuhnya benar.
+                {feedbacks.matematik || 'Tidak ada feedback.'}
               </p>
             </GlassCard>
 
@@ -83,10 +142,10 @@ export default function HasilSoal() {
                 <h3 className="text-lg font-semibold flex items-center">
                   <span className="w-3 h-3 rounded-full bg-accent mr-3"></span> Grafik
                 </h3>
-                <span className="text-xl font-bold text-accent">65/100</span>
+                <span className="text-xl font-bold text-accent">{jawaban.skor_grafik}/100</span>
               </div>
               <p className="text-gray-300 text-sm leading-relaxed bg-white/5 p-4 rounded-xl">
-                Anda menyebutkan bahwa kecepatan bertambah, namun kurang tepat dalam mendeskripsikan bentuk kurvanya. Karena percepatannya konstan, seharusnya grafik v-t berupa garis lurus miring ke atas (linear), bukan kurva lengkung (eksponensial).
+                {feedbacks.grafik || 'Tidak ada feedback.'}
               </p>
             </GlassCard>
 
@@ -95,30 +154,32 @@ export default function HasilSoal() {
                 <h3 className="text-lg font-semibold flex items-center">
                   <span className="w-3 h-3 rounded-full bg-emerald-400 mr-3"></span> Visual / Fisik
                 </h3>
-                <span className="text-xl font-bold text-emerald-400">75/100</span>
+                <span className="text-xl font-bold text-emerald-400">{jawaban.skor_visual}/100</span>
               </div>
               <p className="text-gray-300 text-sm leading-relaxed bg-white/5 p-4 rounded-xl">
-                Arah gaya normal tegak lurus bidang miring dan gaya berat lurus ke bawah sudah tepat. Tapi Anda lupa memproyeksikan gaya berat menjadi w_x dan w_y dalam deskripsi diagram gaya.
+                {feedbacks.visual || 'Tidak ada feedback.'}
               </p>
             </GlassCard>
 
           </div>
         </div>
 
-        {/* Saran Peningkatan Section */}
-        <GlassCard className="mt-8 border-warning/30 bg-warning/5">
-          <div className="flex items-start space-x-4">
-            <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
-              <span className="text-warning text-xl">💡</span>
+        {/* Saran Peningkatan Section (General) */}
+        {totalScore < 80 && (
+          <GlassCard className="mt-8 border-warning/30 bg-warning/5">
+            <div className="flex items-start space-x-4">
+              <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
+                <span className="text-warning text-xl">💡</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-warning mb-2">Saran Peningkatan Umum</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Skor akhir Anda masih di bawah 80. Silakan tinjau kembali bagian representasi yang memiliki skor paling rendah (di bawah 70) pada panel di atas. Anda dapat membaca kembali materi terkait dan melatih representasi tersebut agar pemahaman fisika Anda lebih komprehensif.
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-xl font-bold text-warning mb-2">Saran Peningkatan</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Anda perlu melatih kembali pemahaman pada <strong className="text-white">Representasi Grafik</strong>. Pelajari kembali materi tentang gerak lurus dengan percepatan konstan (GLBB) dan bagaimana bentuk grafiknya terhadap waktu. Berlatihlah menggambar grafik hubungan $v-t$ agar lebih terbiasa membedakan percepatan konstan (garis linear) dan percepatan berubah (kurva lengkung).
-              </p>
-            </div>
-          </div>
-        </GlassCard>
+          </GlassCard>
+        )}
       </div>
     </DashboardLayout>
   );
