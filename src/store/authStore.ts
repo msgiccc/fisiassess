@@ -14,6 +14,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isInitialized: boolean;
   setUser: (user: User | null) => void;
+  updateUser: (data: Partial<User>) => void;
   logout: () => Promise<void>;
   initialize: () => Promise<void>;
 }
@@ -23,6 +24,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   isInitialized: false,
   setUser: (user) => set({ user, isAuthenticated: !!user }),
+  updateUser: (data) => set((state) => ({
+    user: state.user ? { ...state.user, ...data } : null,
+  })),
   logout: async () => {
     await supabase.auth.signOut();
     set({ user: null, isAuthenticated: false });

@@ -1,7 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { Home, PlusCircle, Users, Settings, LogOut, FileText } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 export function GlassSidebar() {
   const { user, logout } = useAuthStore();
@@ -19,13 +18,13 @@ export function GlassSidebar() {
     { name: 'Kelas & Siswa', path: '/kelas', icon: Users, isDivider: false },
     { name: 'Divider', path: '', icon: null, isDivider: true },
     { name: 'Input Esai', path: '/input-esai', icon: FileText, isDivider: false },
-    { name: 'Pengaturan', path: '#', icon: Settings, isDivider: false },
+    { name: 'Pengaturan', path: '/pengaturan', icon: Settings, isDivider: false },
   ];
 
   const menuSiswa = [
     { name: 'Dashboard', path: '/dashboard-siswa', icon: Home, isDivider: false },
-    { name: 'Daftar Tugas', path: '#', icon: FileText, isDivider: false },
-    { name: 'Pengaturan', path: '#', icon: Settings, isDivider: false },
+    { name: 'Daftar Tugas', path: '/daftar-tugas', icon: FileText, isDivider: false },
+    { name: 'Pengaturan', path: '/pengaturan', icon: Settings, isDivider: false },
   ];
 
   const menu = user?.role === 'guru' ? menuGuru : menuSiswa;
@@ -46,20 +45,10 @@ export function GlassSidebar() {
             );
           }
 
-          const isActive = location.pathname.startsWith(item.path) && item.path !== '#';
-          const isMock = item.path === '#';
+          const isActive = location.pathname.startsWith(item.path);
           const Icon = item.icon!;
           
-          return isMock ? (
-            <button
-              key={item.name}
-              onClick={() => toast('Fitur ini masih dalam tahap pengembangan.', { icon: '🚧' })}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all text-slate-500 hover:text-primary hover:bg-primary/5 text-left"
-            >
-              <Icon className="w-5 h-5" />
-              <span className="font-semibold text-sm tracking-wide">{item.name}</span>
-            </button>
-          ) : (
+          return (
             <Link
               key={item.name}
               to={item.path}

@@ -17,6 +17,8 @@ import BuatRubrikManual from './pages/BuatRubrikManual';
 import ManajemenKelas from './pages/ManajemenKelas';
 import JoinKelas from './pages/JoinKelas';
 import Tentang from './pages/Tentang';
+import DaftarTugas from './pages/DaftarTugas';
+import Pengaturan from './pages/Pengaturan';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
 function App() {
@@ -66,12 +68,14 @@ function App() {
         {/* Protected Routes untuk Siswa */}
         <Route element={<ProtectedRoute allowedRoles={['siswa']} />}>
           <Route path="/dashboard-siswa" element={<DashboardSiswa />} />
+          <Route path="/daftar-tugas" element={<DaftarTugas />} />
           <Route path="/kerjakan/:id" element={<KerjakanSoal />} />
         </Route>
 
         {/* Protected Routes untuk Keduanya */}
         <Route element={<ProtectedRoute />}>
           <Route path="/hasil/:id" element={<HasilSoal />} />
+          <Route path="/pengaturan" element={<Pengaturan />} />
         </Route>
       </Routes>
     </Router>
