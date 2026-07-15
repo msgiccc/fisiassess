@@ -31,9 +31,8 @@ export default function BuatRubrikManual() {
         {
           guru_id: user.id,
           judul: formData.judul,
-          soal_text: 'EVALUASI MANUAL VIA EXCEL', // Teks dummy karena tidak dipakai
-          kelas: 'MANUAL_EVAL', // Flag penanda khusus
-          topik: 'MANUAL',
+          soal_text: 'EVALUASI MANUAL VIA EXCEL',
+          topik: 'MANUAL_EVAL',
           kunci_verbal: formData.kunci_verbal,
           kunci_matematik: formData.kunci_matematik,
           kunci_grafik: formData.kunci_grafik,

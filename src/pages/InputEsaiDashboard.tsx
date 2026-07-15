@@ -24,7 +24,7 @@ export default function InputEsaiDashboard() {
         .from('assessment_soal')
         .select('*')
         .eq('guru_id', user.id)
-        .eq('kelas', 'MANUAL_EVAL')
+        .eq('topik', 'MANUAL_EVAL')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
