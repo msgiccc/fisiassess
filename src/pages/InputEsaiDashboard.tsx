@@ -79,6 +79,7 @@ export default function InputEsaiDashboard() {
           ...rest, 
           topik: topikInput,
           kelas_id: selectedKelas,
+          soal_text: '',
           judul: `${rest.judul} (Salinan Online)`
         }]);
       
