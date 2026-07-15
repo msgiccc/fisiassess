@@ -141,12 +141,21 @@ Format Output:
           }),
         });
 
-        if (!response.ok) throw new Error("API Limit");
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(`API HTTP ${response.status}: ${errText}`);
+        }
 
         const data = await response.json();
         let content = data.choices[0].message.content.trim();
-        content = content.replace(/```json/g, '').replace(/```/g, '').trim();
-        const evalResult = JSON.parse(content);
+        
+        // Ekstrak JSON menggunakan regex untuk menghindari teks tambahan dari AI
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          throw new Error(`Invalid AI Output: ${content.substring(0, 50)}...`);
+        }
+        
+        const evalResult = JSON.parse(jsonMatch[0]);
 
         const totalSkor = Math.round(((evalResult.verbal?.skor || 0) + (evalResult.matematik?.skor || 0) + (evalResult.grafik?.skor || 0) + (evalResult.visual?.skor || 0)) / 4);
 
@@ -193,12 +202,13 @@ Format Output:
         // Beri jeda kecil antar siswa agar tidak hit rate limit (1 detik)
         await new Promise(r => setTimeout(r, 1000));
 
-      } catch (err) {
+      } catch (err: any) {
+        console.error("Bulk Eval Error:", err);
         currentResults.push({
           nama: row['Nama Siswa'],
           skor_verbal: 0, skor_matematik: 0, skor_grafik: 0, skor_visual: 0, skor_total: 0,
           feedback: null,
-          status: 'Gagal API'
+          status: `Gagal: ${err.message?.substring(0, 40) || 'Unknown'}`
         });
       }
 
