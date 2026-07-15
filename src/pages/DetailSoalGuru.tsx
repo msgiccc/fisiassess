@@ -77,11 +77,6 @@ export default function DetailSoalGuru() {
 
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-2">
           <h1 className="text-3xl font-bold">Detail Tugas: {soal.judul}</h1>
-          <Link to={`/soal/${id}/bulk-eval`}>
-            <button className="btn-primary py-2 flex items-center gap-2 shadow-sm">
-              <FileSpreadsheet className="w-4 h-4" /> Mode Evaluasi Excel
-            </button>
-          </Link>
         </div>
         <p className="text-slate-500 mb-8">Topik: {soal.topik} | Kelas: {soal.kelas || 'Semua Kelas'}</p>
 

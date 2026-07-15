@@ -25,6 +25,7 @@ export default function DashboardGuru() {
         .from('assessment_soal')
         .select('*')
         .eq('guru_id', user?.id)
+        .neq('kelas', 'MANUAL_EVAL')
         .order('created_at', { ascending: false });
 
       if (error) throw error;

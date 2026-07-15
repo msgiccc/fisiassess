@@ -14,10 +14,12 @@ export function GlassSidebar() {
   };
 
   const menuGuru = [
-    { name: 'Dashboard', path: '/dashboard', icon: Home },
-    { name: 'Buat Soal', path: '/buat-soal', icon: PlusCircle },
-    { name: 'Kelas & Siswa', path: '/kelas', icon: Users },
-    { name: 'Pengaturan', path: '#', icon: Settings },
+    { name: 'Dashboard', path: '/dashboard', icon: Home, isDivider: false },
+    { name: 'Buat Soal', path: '/buat-soal', icon: PlusCircle, isDivider: false },
+    { name: 'Kelas & Siswa', path: '/kelas', icon: Users, isDivider: false },
+    { name: 'Divider', path: '', icon: null, isDivider: true },
+    { name: 'Input Esai', path: '/input-esai', icon: FileText, isDivider: false },
+    { name: 'Pengaturan', path: '#', icon: Settings, isDivider: false },
   ];
 
   const menuSiswa = [
@@ -37,10 +39,16 @@ export function GlassSidebar() {
       </div>
 
       <nav className="flex-1 space-y-2">
-        {menu.map((item) => {
-          const isActive = location.pathname === item.path;
+        {menu.map((item, index) => {
+          if (item.isDivider) {
+            return (
+              <div key={`divider-${index}`} className="my-4 border-t border-slate-200 border-dashed" />
+            );
+          }
+
+          const isActive = location.pathname.startsWith(item.path) && item.path !== '#';
           const isMock = item.path === '#';
-          const Icon = item.icon;
+          const Icon = item.icon!;
           
           return isMock ? (
             <button

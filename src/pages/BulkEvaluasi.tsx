@@ -90,6 +90,31 @@ export default function BulkEvaluasi() {
     XLSX.writeFile(wb, "Template_Evaluasi_FisGrade.xlsx");
   };
 
+  const exportToExcel = () => {
+    if (results.length === 0) {
+      toast.error('Belum ada hasil evaluasi untuk diekspor');
+      return;
+    }
+    
+    const exportData = results.map(res => ({
+      'Nama Siswa': res.nama,
+      'Skor Verbal': res.skor_verbal,
+      'Skor Matematik': res.skor_matematik,
+      'Skor Grafik': res.skor_grafik,
+      'Skor Visual': res.skor_visual,
+      'Skor Total': res.skor_total,
+      'Feedback Verbal': res.feedback?.verbal || '',
+      'Feedback Matematik': res.feedback?.matematik || '',
+      'Feedback Grafik': res.feedback?.grafik || '',
+      'Feedback Visual': res.feedback?.visual || ''
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Hasil Evaluasi");
+    XLSX.writeFile(wb, `Hasil_Evaluasi_${soal?.judul || 'FisGrade'}.xlsx`);
+  };
+
   const startBulkEvaluation = async () => {
     if (excelData.length === 0) return;
     setIsProcessing(true);
@@ -270,8 +295,8 @@ Format Output:
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto pb-10">
-        <Link to={`/soal/${id}`} className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary mb-6 transition-colors">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Detail Soal
+        <Link to={`/input-esai`} className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary mb-6 transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Daftar Rubrik
         </Link>
 
         <div className="mb-8">
@@ -329,15 +354,27 @@ Format Output:
                 Hasil Analisis & Pratinjau ({excelData.length} Baris)
               </h2>
               
-              {!isProcessing && progress === 0 && (
-                <button 
-                  onClick={startBulkEvaluation}
-                  className="btn-primary flex items-center gap-2"
-                >
-                  <Play className="w-4 h-4" />
-                  Mulai Penilaian Otomatis
-                </button>
-              )}
+              <div className="flex items-center gap-3">
+                {!isProcessing && progress === 0 && (
+                  <button 
+                    onClick={startBulkEvaluation}
+                    className="btn-primary flex items-center gap-2"
+                  >
+                    <Play className="w-4 h-4" />
+                    Mulai Penilaian Otomatis
+                  </button>
+                )}
+                
+                {results.length > 0 && !isProcessing && (
+                  <button 
+                    onClick={exportToExcel}
+                    className="flex items-center justify-center py-2.5 px-4 rounded-xl border-2 border-emerald-500 text-emerald-600 font-bold hover:bg-emerald-50 transition-colors gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Unduh Rekap (XLSX)
+                  </button>
+                )}
+              </div>
             </div>
 
             {(isProcessing || progress > 0) && (

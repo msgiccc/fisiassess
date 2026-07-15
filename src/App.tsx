@@ -12,6 +12,8 @@ import KerjakanSoal from './pages/KerjakanSoal';
 import HasilSoal from './pages/HasilSoal';
 import DetailSoalGuru from './pages/DetailSoalGuru';
 import BulkEvaluasi from './pages/BulkEvaluasi';
+import InputEsaiDashboard from './pages/InputEsaiDashboard';
+import BuatRubrikManual from './pages/BuatRubrikManual';
 import ManajemenKelas from './pages/ManajemenKelas';
 import JoinKelas from './pages/JoinKelas';
 import Tentang from './pages/Tentang';
@@ -53,7 +55,9 @@ function App() {
           <Route path="/dashboard" element={<DashboardGuru />} />
           <Route path="/buat-soal" element={<BuatSoal />} />
           <Route path="/soal/:id" element={<DetailSoalGuru />} />
-          <Route path="/soal/:id/bulk-eval" element={<BulkEvaluasi />} />
+          <Route path="/input-esai" element={<InputEsaiDashboard />} />
+          <Route path="/input-esai/buat" element={<BuatRubrikManual />} />
+          <Route path="/input-esai/:id" element={<BulkEvaluasi />} />
           <Route path="/kelas" element={<ManajemenKelas />} />
         </Route>
 
