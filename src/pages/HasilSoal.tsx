@@ -66,27 +66,29 @@ export default function HasilSoal() {
   if (loading) return <DashboardLayout><p className="p-8">Memuat hasil evaluasi...</p></DashboardLayout>;
   if (!jawaban) return <DashboardLayout><p className="p-8 text-red-400">Hasil tidak ditemukan.</p></DashboardLayout>;
 
-  const data = [];
+  const data = [
+    { representasi: 'Verbal', skor: soal.kunci_verbal ? (jawaban.skor_verbal || 0) : 0, fullMark: 100 },
+    { representasi: 'Matematik', skor: soal.kunci_matematik ? (jawaban.skor_matematik || 0) : 0, fullMark: 100 },
+    { representasi: 'Grafik', skor: soal.kunci_grafik ? (jawaban.skor_grafik || 0) : 0, fullMark: 100 },
+    { representasi: 'Visual', skor: soal.kunci_visual ? (jawaban.skor_visual || 0) : 0, fullMark: 100 }
+  ];
+
   let total = 0;
   let activeCount = 0;
   
   if (soal.kunci_verbal) {
-    data.push({ representasi: 'Verbal', skor: jawaban.skor_verbal, fullMark: 100 });
     total += (jawaban.skor_verbal || 0);
     activeCount++;
   }
   if (soal.kunci_matematik) {
-    data.push({ representasi: 'Matematik', skor: jawaban.skor_matematik, fullMark: 100 });
     total += (jawaban.skor_matematik || 0);
     activeCount++;
   }
   if (soal.kunci_grafik) {
-    data.push({ representasi: 'Grafik', skor: jawaban.skor_grafik, fullMark: 100 });
     total += (jawaban.skor_grafik || 0);
     activeCount++;
   }
   if (soal.kunci_visual) {
-    data.push({ representasi: 'Visual', skor: jawaban.skor_visual, fullMark: 100 });
     total += (jawaban.skor_visual || 0);
     activeCount++;
   }
