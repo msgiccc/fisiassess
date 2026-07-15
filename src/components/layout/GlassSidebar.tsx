@@ -32,7 +32,7 @@ export function GlassSidebar() {
     <aside className="w-64 bg-white min-h-[calc(100vh-2rem)] m-4 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-6 flex flex-col hidden md:flex">
       <div className="mb-10 text-center">
         <Link to="/" className="text-2xl font-bold font-heading tracking-tight text-slate-900">
-          Fisi<span className="text-primary">Assess</span>
+          Fis<span className="text-primary">Grade</span>
         </Link>
       </div>
 

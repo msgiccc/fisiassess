@@ -44,7 +44,7 @@ export default function Landing() {
               variants={item}
               className="text-lg text-slate-500 mb-10 max-w-lg leading-relaxed"
             >
-              FisiAssess membantu Guru menilai esai fisika dalam 4 representasi: Verbal, Matematik, Grafik, dan Visual secara otomatis.
+              FisGrade membantu Guru menilai esai fisika dalam 4 representasi: Verbal, Matematik, Grafik, dan Visual secara otomatis.
             </motion.p>
             
             <motion.div variants={item} className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
@@ -113,14 +113,14 @@ export default function Landing() {
           </motion.div>
         </div>
 
-        {/* Categories Section (Diubah menjadi Cara Kerja FisiAssess) */}
+        {/* Categories Section (Diubah menjadi Cara Kerja FisGrade) */}
         <div className="mt-32 w-full">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12">
             <h2 className="text-4xl lg:text-5xl font-bold font-heading max-w-lg">
-              3 Langkah Mudah: Cara Kerja <span className="text-primary">FisiAssess</span>
+              3 Langkah Mudah: Cara Kerja <span className="text-primary">FisGrade</span>
             </h2>
             <p className="text-slate-500 max-w-sm mt-4 md:mt-0">
-              FisiAssess merampingkan proses evaluasi pembelajaran fisika Anda secara otomatis dan komprehensif.
+              FisGrade merampingkan proses evaluasi pembelajaran fisika Anda secara otomatis dan komprehensif.
             </p>
           </div>
 
@@ -180,7 +180,7 @@ export default function Landing() {
       
       {/* Footer */}
       <footer className="w-full py-8 mt-12 text-center border-t border-slate-200 bg-white">
-        <p className="text-slate-500 font-medium text-sm">FisiAssess — PKM-KC AMLI 2026</p>
+        <p className="text-slate-500 font-medium text-sm">FisGrade — PKM-KC AMLI 2026</p>
       </footer>
     </div>
   );

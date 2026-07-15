@@ -12,7 +12,7 @@ export function GlassNavbar() {
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <span className="text-white text-lg">✦</span>
           </div>
-          FisiAssess
+          FisGrade
         </Link>
 
         <div className="hidden md:flex items-center space-x-8">

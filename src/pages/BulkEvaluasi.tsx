@@ -84,7 +84,7 @@ export default function BulkEvaluasi() {
     const ws = XLSX.utils.json_to_sheet(template);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Template");
-    XLSX.writeFile(wb, "Template_Evaluasi_FisiAssess.xlsx");
+    XLSX.writeFile(wb, "Template_Evaluasi_FisGrade.xlsx");
   };
 
   const startBulkEvaluation = async () => {
