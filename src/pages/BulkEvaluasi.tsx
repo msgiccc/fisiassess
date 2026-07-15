@@ -6,7 +6,6 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { ArrowLeft, Upload, Play, CheckCircle, FileSpreadsheet, Download, Search, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
-import { evaluateAnswer } from '../lib/openrouter';
 
 interface ExcelDataRow {
   'Nama Siswa': string;
@@ -103,22 +102,61 @@ export default function BulkEvaluasi() {
       const row = excelData[i];
       
       try {
-        const [hasilVerbal, hasilMatematik, hasilGrafik, hasilVisual] = await Promise.all([
-          evaluateAnswer(soal.soal_text, soal.kunci_verbal, row['Verbal'] || '', "Verbal"),
-          evaluateAnswer(soal.soal_text, soal.kunci_matematik, row['Matematik'] || '', "Matematik"),
-          evaluateAnswer(soal.soal_text, soal.kunci_grafik, row['Grafik'] || '', "Grafik"),
-          evaluateAnswer(soal.soal_text, soal.kunci_visual, row['Visual'] || '', "Visual / Fisik"),
-        ]);
+        const prompt = `Kamu adalah asisten penilai esai fisika. 
+Evaluasi 4 representasi jawaban siswa berikut berdasarkan kunci jawaban.
+Berikan skor (0-100) dan feedback singkat yang membangun untuk masing-masing representasi.
+OUTPUT HARUS HANYA BERUPA JSON VALID TANPA MARKDOWN.
 
-        const totalSkor = Math.round((hasilVerbal.skor + hasilMatematik.skor + hasilGrafik.skor + hasilVisual.skor) / 4);
+SOAL: ${soal.soal_text}
+
+[VERBAL]
+Kunci: ${soal.kunci_verbal}
+Jawaban: ${row['Verbal'] || ''}
+
+[MATEMATIK]
+Kunci: ${soal.kunci_matematik}
+Jawaban: ${row['Matematik'] || ''}
+
+[GRAFIK]
+Kunci: ${soal.kunci_grafik}
+Jawaban: ${row['Grafik'] || ''}
+
+[VISUAL]
+Kunci: ${soal.kunci_visual}
+Jawaban: ${row['Visual'] || ''}
+
+Format Output:
+{"verbal":{"skor":number,"feedback":"..."},"matematik":{"skor":number,"feedback":"..."},"grafik":{"skor":number,"feedback":"..."},"visual":{"skor":number,"feedback":"..."}}`;
+
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash", 
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.1,
+          }),
+        });
+
+        if (!response.ok) throw new Error("API Limit");
+
+        const data = await response.json();
+        let content = data.choices[0].message.content.trim();
+        content = content.replace(/```json/g, '').replace(/```/g, '').trim();
+        const evalResult = JSON.parse(content);
+
+        const totalSkor = Math.round(((evalResult.verbal?.skor || 0) + (evalResult.matematik?.skor || 0) + (evalResult.grafik?.skor || 0) + (evalResult.visual?.skor || 0)) / 4);
 
         // Siapkan feedback JSON string, disisipkan nama dari Excel agar DetailSoalGuru bisa membacanya
         const feedbackString = JSON.stringify({
           nama_excel: row['Nama Siswa'],
-          verbal: hasilVerbal.feedback || '-',
-          matematik: hasilMatematik.feedback || '-',
-          grafik: hasilGrafik.feedback || '-',
-          visual: hasilVisual.feedback || '-',
+          verbal: evalResult.verbal?.feedback || '-',
+          matematik: evalResult.matematik?.feedback || '-',
+          grafik: evalResult.grafik?.feedback || '-',
+          visual: evalResult.visual?.feedback || '-',
         });
 
         // Simpan ke tabel yang BENAR: assessment_jawaban
@@ -129,28 +167,31 @@ export default function BulkEvaluasi() {
           jawaban_matematik: row['Matematik'] || '',
           jawaban_grafik: row['Grafik'] || '',
           jawaban_visual: row['Visual'] || '',
-          skor_verbal: hasilVerbal.skor || 0,
-          skor_matematik: hasilMatematik.skor || 0,
-          skor_grafik: hasilGrafik.skor || 0,
-          skor_visual: hasilVisual.skor || 0,
+          skor_verbal: evalResult.verbal?.skor || 0,
+          skor_matematik: evalResult.matematik?.skor || 0,
+          skor_grafik: evalResult.grafik?.skor || 0,
+          skor_visual: evalResult.visual?.skor || 0,
           feedback: feedbackString
         }]);
 
         currentResults.push({
           nama: row['Nama Siswa'],
-          skor_verbal: hasilVerbal.skor || 0,
-          skor_matematik: hasilMatematik.skor || 0,
-          skor_grafik: hasilGrafik.skor || 0,
-          skor_visual: hasilVisual.skor || 0,
+          skor_verbal: evalResult.verbal?.skor || 0,
+          skor_matematik: evalResult.matematik?.skor || 0,
+          skor_grafik: evalResult.grafik?.skor || 0,
+          skor_visual: evalResult.visual?.skor || 0,
           skor_total: totalSkor,
           feedback: {
-            verbal: hasilVerbal.feedback || '-',
-            matematik: hasilMatematik.feedback || '-',
-            grafik: hasilGrafik.feedback || '-',
-            visual: hasilVisual.feedback || '-',
+            verbal: evalResult.verbal?.feedback || '-',
+            matematik: evalResult.matematik?.feedback || '-',
+            grafik: evalResult.grafik?.feedback || '-',
+            visual: evalResult.visual?.feedback || '-',
           },
           status: 'Sukses'
         });
+
+        // Beri jeda kecil antar siswa agar tidak hit rate limit (1 detik)
+        await new Promise(r => setTimeout(r, 1000));
 
       } catch (err) {
         currentResults.push({
