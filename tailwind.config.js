@@ -8,25 +8,29 @@ export default {
     extend: {
       colors: {
         dark: {
-          900: '#0a0a0f', // Very dark background
-          800: '#13131f', // Slightly lighter dark for cards
-          700: '#1c1c2e',
+          900: '#ffffff', // Overridden to white for light theme compatibility
+          800: '#f8fafc',
+          700: '#f1f5f9',
         },
         primary: {
-          DEFAULT: '#8b5cf6', // Neon Purple
-          glow: '#a78bfa',
+          DEFAULT: '#111827', // Almost black
+          glow: '#374151',
         },
         secondary: {
-          DEFAULT: '#06b6d4', // Neon Cyan
-          glow: '#22d3ee',
+          DEFAULT: '#4b5563', // Gray
+          glow: '#6b7280',
         },
         accent: {
-          DEFAULT: '#f59e0b', // Amber/Gold
+          DEFAULT: '#000000', // Pure black
         }
+      },
+      fontFamily: {
+        sans: ['Montserrat', 'system-ui', 'sans-serif'],
+        heading: ['Oswald', 'sans-serif'],
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'hero-glow': 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15) 0%, rgba(10, 10, 15, 1) 100%)',
+        'hero-glow': 'none', // Remove glow
       }
     },
   },

@@ -57,7 +57,7 @@ export default function DetailSoalGuru() {
   };
 
   if (loading) {
-    return <DashboardLayout><p className="p-8 text-gray-400">Memuat data tugas...</p></DashboardLayout>;
+    return <DashboardLayout><p className="p-8 text-slate-500">Memuat data tugas...</p></DashboardLayout>;
   }
 
   if (!soal) {
@@ -71,20 +71,20 @@ export default function DetailSoalGuru() {
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto pb-12">
-        <Link to="/dashboard" className="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors">
+        <Link to="/dashboard" className="inline-flex items-center text-slate-500 hover:text-slate-900 mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Dashboard
         </Link>
 
         <h1 className="text-3xl font-bold mb-2">Detail Tugas: {soal.judul}</h1>
-        <p className="text-gray-400 mb-8">Topik: {soal.topik} | Kelas: {soal.kelas || 'Semua Kelas'}</p>
+        <p className="text-slate-500 mb-8">Topik: {soal.topik} | Kelas: {soal.kelas || 'Semua Kelas'}</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <GlassCard className="flex items-center space-x-4 border-l-4 border-l-primary-glow">
             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-              <Users className="text-primary-glow w-6 h-6" />
+              <Users className="text-slate-900 w-6 h-6" />
             </div>
             <div>
-              <p className="text-gray-400 text-sm">Siswa yang Mengumpulkan</p>
+              <p className="text-slate-500 text-sm">Siswa yang Mengumpulkan</p>
               <p className="text-2xl font-bold">{jawabanList.length}</p>
             </div>
           </GlassCard>
@@ -94,7 +94,7 @@ export default function DetailSoalGuru() {
               <Trophy className="text-accent w-6 h-6" />
             </div>
             <div>
-              <p className="text-gray-400 text-sm">Rata-rata Skor Kelas</p>
+              <p className="text-slate-500 text-sm">Rata-rata Skor Kelas</p>
               <p className="text-2xl font-bold">{rataRataTugas}</p>
             </div>
           </GlassCard>
@@ -106,31 +106,31 @@ export default function DetailSoalGuru() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/10 text-gray-400 text-sm">
+                <tr className="border-b border-slate-200 text-slate-500 text-sm">
                   <th className="pb-3 px-4 font-medium">Nama Siswa</th>
                   <th className="pb-3 px-4 font-medium">NIM/NISN</th>
                   <th className="pb-3 px-4 font-medium text-center">Verbal</th>
                   <th className="pb-3 px-4 font-medium text-center">Matematik</th>
                   <th className="pb-3 px-4 font-medium text-center">Grafik</th>
                   <th className="pb-3 px-4 font-medium text-center">Visual</th>
-                  <th className="pb-3 px-4 font-medium text-center text-white">Total Skor</th>
+                  <th className="pb-3 px-4 font-medium text-center text-slate-900">Total Skor</th>
                 </tr>
               </thead>
               <tbody>
                 {jawabanList.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-gray-400">Belum ada siswa yang mengerjakan tugas ini.</td>
+                    <td colSpan={7} className="py-8 text-center text-slate-500">Belum ada siswa yang mengerjakan tugas ini.</td>
                   </tr>
                 ) : (
                   jawabanList.map((j) => (
-                    <tr key={j.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <tr key={j.id} className="border-b border-white/5 hover:bg-slate-50 transition-colors">
                       <td className="py-4 px-4 font-medium">{j.profiles?.nama || 'Siswa Tanpa Nama'}</td>
-                      <td className="py-4 px-4 text-gray-400">{j.profiles?.nim || '-'}</td>
-                      <td className="py-4 px-4 text-center text-primary-glow">{j.skor_verbal}</td>
-                      <td className="py-4 px-4 text-center text-secondary-glow">{j.skor_matematik}</td>
+                      <td className="py-4 px-4 text-slate-500">{j.profiles?.nim || '-'}</td>
+                      <td className="py-4 px-4 text-center text-slate-900">{j.skor_verbal}</td>
+                      <td className="py-4 px-4 text-center text-slate-700">{j.skor_matematik}</td>
                       <td className="py-4 px-4 text-center text-accent">{j.skor_grafik}</td>
                       <td className="py-4 px-4 text-center text-emerald-400">{j.skor_visual}</td>
-                      <td className="py-4 px-4 text-center font-bold text-white text-lg">{j.totalSkor}</td>
+                      <td className="py-4 px-4 text-center font-bold text-slate-900 text-lg">{j.totalSkor}</td>
                     </tr>
                   ))
                 )}

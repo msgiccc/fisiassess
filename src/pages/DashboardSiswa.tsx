@@ -88,25 +88,25 @@ export default function DashboardSiswa() {
     <DashboardLayout>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Halo, {user?.name || 'Siswa'}!</h1>
-        <p className="text-gray-400">Siap untuk berlatih soal fisika hari ini?</p>
+        <p className="text-slate-500">Siap untuk berlatih soal fisika hari ini?</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {loading ? (
-          <p className="text-gray-400">Memuat daftar tugas...</p>
+          <p className="text-slate-500">Memuat daftar tugas...</p>
         ) : soalList.length === 0 ? (
-          <p className="text-gray-400">Belum ada tugas yang tersedia.</p>
+          <p className="text-slate-500">Belum ada tugas yang tersedia.</p>
         ) : (
           soalList.map(tugas => (
             <GlassCard key={tugas.id} className="relative overflow-hidden">
               {tugas.status === 'Selesai' && (
-                <div className="absolute top-0 right-0 bg-emerald-500 text-white px-4 py-1 text-xs font-bold rounded-bl-xl">
+                <div className="absolute top-0 right-0 bg-emerald-500 text-slate-900 px-4 py-1 text-xs font-bold rounded-bl-xl">
                   Selesai
                 </div>
               )}
               
               <h3 className="text-xl font-bold mb-1 mt-2">{tugas.judul}</h3>
-              <p className="text-sm text-gray-400 mb-6">Guru: {tugas.guru}</p>
+              <p className="text-sm text-slate-500 mb-6">Guru: {tugas.guru}</p>
               
               {tugas.status === 'Belum Dikerjakan' ? (
                 <div className="flex items-center justify-between mt-4">
@@ -122,12 +122,12 @@ export default function DashboardSiswa() {
                   </Link>
                 </div>
               ) : (
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-200">
                   <div className="flex items-center space-x-2 text-emerald-400">
                     <CheckCircle2 className="w-5 h-5" />
                     <span className="font-medium">Skor Rata-rata: {tugas.skor}</span>
                   </div>
-                  <Link to={`/hasil/${tugas.id}`} className="text-sm text-primary-glow hover:underline">
+                  <Link to={`/hasil/${tugas.id}`} className="text-sm text-slate-900 hover:underline">
                     Lihat Hasil Detail
                   </Link>
                 </div>

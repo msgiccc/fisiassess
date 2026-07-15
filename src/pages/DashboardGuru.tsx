@@ -63,26 +63,26 @@ export default function DashboardGuru() {
     <DashboardLayout>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Selamat datang, {user?.name || 'Guru'}</h1>
-        <p className="text-gray-400">Berikut adalah ringkasan aktivitas dan soal yang Anda buat.</p>
+        <p className="text-slate-500">Berikut adalah ringkasan aktivitas dan soal yang Anda buat.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <GlassCard className="flex items-center space-x-4">
           <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-            <BookOpen className="text-primary-glow w-6 h-6" />
+            <BookOpen className="text-slate-900 w-6 h-6" />
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Total Soal</p>
+            <p className="text-slate-500 text-sm">Total Soal</p>
             <p className="text-2xl font-bold">{loading ? '-' : soalList.length}</p>
           </div>
         </GlassCard>
         
         <GlassCard className="flex items-center space-x-4">
           <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
-            <Users className="text-secondary-glow w-6 h-6" />
+            <Users className="text-slate-700 w-6 h-6" />
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Total Siswa</p>
+            <p className="text-slate-500 text-sm">Total Siswa</p>
             <p className="text-2xl font-bold">{loading ? '-' : stats.totalSiswa}</p>
           </div>
         </GlassCard>
@@ -92,7 +92,7 @@ export default function DashboardGuru() {
             <CheckCircle className="text-accent w-6 h-6" />
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Rata-rata Skor Keseluruhan</p>
+            <p className="text-slate-500 text-sm">Rata-rata Skor Keseluruhan</p>
             <p className="text-2xl font-bold">{loading ? '-' : stats.rataRata}</p>
           </div>
         </GlassCard>
@@ -101,7 +101,7 @@ export default function DashboardGuru() {
       <GlassCard>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Daftar Soal Terbaru</h2>
-          <Link to="/buat-soal" className="text-sm text-primary-glow hover:underline">
+          <Link to="/buat-soal" className="text-sm text-slate-900 hover:underline">
             + Buat Soal Baru
           </Link>
         </div>
@@ -109,7 +109,7 @@ export default function DashboardGuru() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/10 text-gray-400 text-sm">
+              <tr className="border-b border-slate-200 text-slate-500 text-sm">
                 <th className="pb-3 px-4 font-medium">Judul Soal</th>
                 <th className="pb-3 px-4 font-medium">Kelas</th>
                 <th className="pb-3 px-4 font-medium">Topik</th>
@@ -120,27 +120,27 @@ export default function DashboardGuru() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="py-4 text-center text-gray-400">Memuat data...</td>
+                  <td colSpan={5} className="py-4 text-center text-slate-500">Memuat data...</td>
                 </tr>
               ) : soalList.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-4 text-center text-gray-400">Belum ada soal yang dibuat.</td>
+                  <td colSpan={5} className="py-4 text-center text-slate-500">Belum ada soal yang dibuat.</td>
                 </tr>
               ) : (
                 soalList.map((soal) => (
-                  <tr key={soal.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <tr key={soal.id} className="border-b border-white/5 hover:bg-slate-50 transition-colors">
                     <td className="py-4 px-4">{soal.judul}</td>
-                    <td className="py-4 px-4 text-gray-300">{soal.kelas || '-'}</td>
-                    <td className="py-4 px-4 text-gray-300">{soal.topik}</td>
+                    <td className="py-4 px-4 text-slate-600">{soal.kelas || '-'}</td>
+                    <td className="py-4 px-4 text-slate-600">{soal.topik}</td>
                     <td className="py-4 px-4">
-                      <span className={`px-3 py-1 rounded-full text-xs ${soal.aktif ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs ${soal.aktif ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-500/20 text-slate-500'}`}>
                         {soal.aktif ? 'Aktif' : 'Draft'}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-right">
                       <Link 
                         to={`/soal/${soal.id}`}
-                        className="text-primary-glow text-sm hover:underline"
+                        className="text-slate-900 text-sm hover:underline"
                       >
                         Lihat Detail
                       </Link>

@@ -107,7 +107,7 @@ export default function KerjakanSoal() {
   if (loadingSoal) {
     return (
       <DashboardLayout>
-        <p className="text-gray-400 p-8">Memuat soal...</p>
+        <p className="text-slate-500 p-8">Memuat soal...</p>
       </DashboardLayout>
     );
   }
@@ -127,10 +127,10 @@ export default function KerjakanSoal() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <h1 className="text-2xl font-bold mb-1">{soal.judul}</h1>
-              <p className="text-sm text-gray-400">Topik: {soal.topik} | Guru: {soal.profiles?.nama || 'Guru'}</p>
+              <p className="text-sm text-slate-500">Topik: {soal.topik} | Guru: {soal.profiles?.nama || 'Guru'}</p>
             </div>
           </div>
-          <div className="bg-white/5 rounded-xl p-4 text-gray-200 whitespace-pre-wrap">
+          <div className="bg-slate-50 rounded-xl p-4 text-gray-200 whitespace-pre-wrap">
             {soal.soal_text}
           </div>
         </GlassCard>
@@ -138,34 +138,34 @@ export default function KerjakanSoal() {
         <form onSubmit={handleSubmit} className="space-y-6">
           
           <GlassCard>
-            <label className="block text-lg font-medium text-white mb-2 flex items-center">
+            <label className="block text-lg font-medium text-slate-900 mb-2 flex items-center">
               <span className="w-3 h-3 rounded-full bg-primary-glow mr-3"></span> 1. Representasi Verbal
             </label>
-            <p className="text-sm text-gray-400 mb-4">Jelaskan dengan kata-kata gaya apa saja yang bekerja dan bagaimana pengaruhnya terhadap gerak benda.</p>
+            <p className="text-sm text-slate-500 mb-4">Jelaskan dengan kata-kata gaya apa saja yang bekerja dan bagaimana pengaruhnya terhadap gerak benda.</p>
             <textarea name="verbal" onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
           </GlassCard>
 
           <GlassCard>
-            <label className="block text-lg font-medium text-white mb-2 flex items-center">
+            <label className="block text-lg font-medium text-slate-900 mb-2 flex items-center">
               <span className="w-3 h-3 rounded-full bg-secondary-glow mr-3"></span> 2. Representasi Matematik
             </label>
-            <p className="text-sm text-gray-400 mb-4">Tuliskan rumus hukum Newton dan hitung nilai percepatan balok (g = 10 m/s²).</p>
+            <p className="text-sm text-slate-500 mb-4">Tuliskan rumus hukum Newton dan hitung nilai percepatan balok (g = 10 m/s²).</p>
             <textarea name="matematik" onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
           </GlassCard>
 
           <GlassCard>
-            <label className="block text-lg font-medium text-white mb-2 flex items-center">
+            <label className="block text-lg font-medium text-slate-900 mb-2 flex items-center">
               <span className="w-3 h-3 rounded-full bg-accent mr-3"></span> 3. Representasi Grafik
             </label>
-            <p className="text-sm text-gray-400 mb-4">Deskripsikan bentuk grafik hubungan antara kecepatan (v) dan waktu (t).</p>
+            <p className="text-sm text-slate-500 mb-4">Deskripsikan bentuk grafik hubungan antara kecepatan (v) dan waktu (t).</p>
             <textarea name="grafik" onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
           </GlassCard>
 
           <GlassCard>
-            <label className="block text-lg font-medium text-white mb-2 flex items-center">
+            <label className="block text-lg font-medium text-slate-900 mb-2 flex items-center">
               <span className="w-3 h-3 rounded-full bg-emerald-400 mr-3"></span> 4. Representasi Visual / Fisik
             </label>
-            <p className="text-sm text-gray-400 mb-4">Deskripsikan arah vektor gaya berat (w), gaya normal (N), dan komponen gaya yang menyebabkan benda meluncur.</p>
+            <p className="text-sm text-slate-500 mb-4">Deskripsikan arah vektor gaya berat (w), gaya normal (N), dan komponen gaya yang menyebabkan benda meluncur.</p>
             <textarea name="visual" onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
           </GlassCard>
 

@@ -80,12 +80,12 @@ export default function HasilSoal() {
   return (
     <DashboardLayout>
       <div className="max-w-5xl mx-auto pb-12">
-        <Link to={user?.role === 'guru' ? '/dashboard' : '/dashboard-siswa'} className="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors">
+        <Link to={user?.role === 'guru' ? '/dashboard' : '/dashboard-siswa'} className="inline-flex items-center text-slate-500 hover:text-slate-900 mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Dashboard
         </Link>
 
         <h1 className="text-3xl font-bold mb-2">Hasil Evaluasi AI: {soal?.judul}</h1>
-        <p className="text-gray-400 mb-8">Dianalisis secara otomatis berdasarkan 4 representasi fisika.</p>
+        <p className="text-slate-500 mb-8">Dianalisis secara otomatis berdasarkan 4 representasi fisika.</p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Radar Chart Section */}
@@ -103,7 +103,7 @@ export default function HasilSoal() {
             </div>
             
             <div className="text-center">
-              <p className="text-gray-400 text-sm mb-1">Skor Akhir</p>
+              <p className="text-slate-500 text-sm mb-1">Skor Akhir</p>
               <h2 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-glow to-secondary-glow">
                 {totalScore}
               </h2>
@@ -118,9 +118,9 @@ export default function HasilSoal() {
                 <h3 className="text-lg font-semibold flex items-center">
                   <span className="w-3 h-3 rounded-full bg-primary-glow mr-3"></span> Verbal
                 </h3>
-                <span className="text-xl font-bold text-primary-glow">{jawaban.skor_verbal}/100</span>
+                <span className="text-xl font-bold text-slate-900">{jawaban.skor_verbal}/100</span>
               </div>
-              <p className="text-gray-300 text-sm leading-relaxed bg-white/5 p-4 rounded-xl">
+              <p className="text-slate-600 text-sm leading-relaxed bg-slate-50 p-4 rounded-xl">
                 {feedbacks.verbal || 'Tidak ada feedback.'}
               </p>
             </GlassCard>
@@ -130,9 +130,9 @@ export default function HasilSoal() {
                 <h3 className="text-lg font-semibold flex items-center">
                   <span className="w-3 h-3 rounded-full bg-secondary-glow mr-3"></span> Matematik
                 </h3>
-                <span className="text-xl font-bold text-secondary-glow">{jawaban.skor_matematik}/100</span>
+                <span className="text-xl font-bold text-slate-700">{jawaban.skor_matematik}/100</span>
               </div>
-              <p className="text-gray-300 text-sm leading-relaxed bg-white/5 p-4 rounded-xl">
+              <p className="text-slate-600 text-sm leading-relaxed bg-slate-50 p-4 rounded-xl">
                 {feedbacks.matematik || 'Tidak ada feedback.'}
               </p>
             </GlassCard>
@@ -144,7 +144,7 @@ export default function HasilSoal() {
                 </h3>
                 <span className="text-xl font-bold text-accent">{jawaban.skor_grafik}/100</span>
               </div>
-              <p className="text-gray-300 text-sm leading-relaxed bg-white/5 p-4 rounded-xl">
+              <p className="text-slate-600 text-sm leading-relaxed bg-slate-50 p-4 rounded-xl">
                 {feedbacks.grafik || 'Tidak ada feedback.'}
               </p>
             </GlassCard>
@@ -156,7 +156,7 @@ export default function HasilSoal() {
                 </h3>
                 <span className="text-xl font-bold text-emerald-400">{jawaban.skor_visual}/100</span>
               </div>
-              <p className="text-gray-300 text-sm leading-relaxed bg-white/5 p-4 rounded-xl">
+              <p className="text-slate-600 text-sm leading-relaxed bg-slate-50 p-4 rounded-xl">
                 {feedbacks.visual || 'Tidak ada feedback.'}
               </p>
             </GlassCard>
@@ -173,7 +173,7 @@ export default function HasilSoal() {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-warning mb-2">Saran Peningkatan Umum</h3>
-                <p className="text-gray-300 leading-relaxed">
+                <p className="text-slate-600 leading-relaxed">
                   Skor akhir Anda masih di bawah 80. Silakan tinjau kembali bagian representasi yang memiliki skor paling rendah (di bawah 70) pada panel di atas. Anda dapat membaca kembali materi terkait dan melatih representasi tersebut agar pemahaman fisika Anda lebih komprehensif.
                 </p>
               </div>

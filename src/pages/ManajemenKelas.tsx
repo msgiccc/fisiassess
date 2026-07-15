@@ -121,7 +121,7 @@ export default function ManajemenKelas() {
     <DashboardLayout>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Manajemen Kelas & Siswa</h1>
-        <p className="text-gray-400">Buat kelas baru dan bagikan link invite kepada siswa Anda.</p>
+        <p className="text-slate-500">Buat kelas baru dan bagikan link invite kepada siswa Anda.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -130,11 +130,11 @@ export default function ManajemenKelas() {
         <div className="lg:col-span-1">
           <GlassCard>
             <h2 className="text-xl font-semibold mb-6 flex items-center">
-              <Plus className="w-5 h-5 mr-2 text-primary-glow" /> Buat Kelas Baru
+              <Plus className="w-5 h-5 mr-2 text-slate-900" /> Buat Kelas Baru
             </h2>
             <form onSubmit={handleBuatKelas} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Nama Kelas</label>
+                <label className="block text-sm font-medium text-slate-600 mb-2">Nama Kelas</label>
                 <input 
                   type="text" 
                   placeholder="Contoh: Fisika X IPA 1" 
@@ -157,17 +157,17 @@ export default function ManajemenKelas() {
             <h2 className="text-xl font-semibold mb-6">Daftar Kelas Saya</h2>
             
             {loading ? (
-              <p className="text-center text-gray-400 py-8">Memuat kelas...</p>
+              <p className="text-center text-slate-500 py-8">Memuat kelas...</p>
             ) : kelasList.length === 0 ? (
-              <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
-                <Users className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-400">Anda belum membuat kelas satupun.</p>
+              <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-200">
+                <Users className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                <p className="text-slate-500">Anda belum membuat kelas satupun.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {kelasList.map((kelas) => (
-                  <div key={kelas.id} className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10 transition-colors">
-                    <h3 className="text-lg font-bold text-white mb-1 flex items-start justify-between">
+                  <div key={kelas.id} className="bg-slate-50 border border-slate-200 rounded-xl p-5 hover:bg-slate-100 transition-colors">
+                    <h3 className="text-lg font-bold text-slate-900 mb-1 flex items-start justify-between">
                       <span className="truncate pr-2">{kelas.nama_kelas}</span>
                       <button 
                         onClick={() => { setClassToDelete(kelas); setDeleteConfirmText(''); }}
@@ -177,18 +177,18 @@ export default function ManajemenKelas() {
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </h3>
-                    <div className="flex items-center text-gray-400 text-sm mb-4">
+                    <div className="flex items-center text-slate-500 text-sm mb-4">
                       <Users className="w-4 h-4 mr-1" />
                       <span>{kelas.class_members[0].count} Siswa Tergabung</span>
                     </div>
                     
-                    <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
-                      <div className="text-xs text-gray-400 truncate max-w-[200px]" title={kelas.kode_invite}>
-                        Kode: <span className="text-white font-mono bg-white/10 px-2 py-1 rounded">{kelas.kode_invite.split('-')[0]}...</span>
+                    <div className="mt-auto pt-4 border-t border-slate-200 flex items-center justify-between">
+                      <div className="text-xs text-slate-500 truncate max-w-[200px]" title={kelas.kode_invite}>
+                        Kode: <span className="text-slate-900 font-mono bg-slate-100 px-2 py-1 rounded">{kelas.kode_invite.split('-')[0]}...</span>
                       </div>
                       <button
                         onClick={() => handleCopyLink(kelas.kode_invite)}
-                        className="text-primary-glow hover:text-white transition-colors p-2 rounded-lg bg-primary/10 hover:bg-primary/30"
+                        className="text-slate-900 hover:text-slate-900 transition-colors p-2 rounded-lg bg-primary/10 hover:bg-primary/30"
                         title="Salin Link Invite"
                       >
                         {copiedId === kelas.kode_invite ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -209,7 +209,7 @@ export default function ManajemenKelas() {
           <GlassCard className="w-full max-w-md relative animate-in fade-in zoom-in duration-200">
             <button 
               onClick={() => setClassToDelete(null)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-900 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -218,7 +218,7 @@ export default function ManajemenKelas() {
               <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
                 <AlertTriangle className="w-8 h-8 text-red-500" />
               </div>
-              <h2 className="text-xl font-bold text-white">Hapus Kelas?</h2>
+              <h2 className="text-xl font-bold text-slate-900">Hapus Kelas?</h2>
             </div>
             
             <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6 text-sm text-red-200">
@@ -229,9 +229,9 @@ export default function ManajemenKelas() {
               </p>
             </div>
 
-            <p className="text-sm text-gray-300 mb-2">
+            <p className="text-sm text-slate-600 mb-2">
               Untuk mengonfirmasi penghapusan, silakan ketik ulang nama kelas:
-              <br /><strong className="text-white select-none">{classToDelete.nama_kelas}</strong>
+              <br /><strong className="text-slate-900 select-none">{classToDelete.nama_kelas}</strong>
             </p>
 
             <input 
@@ -245,14 +245,14 @@ export default function ManajemenKelas() {
             <div className="flex space-x-3">
               <GlassButton 
                 variant="primary" 
-                className="flex-1 bg-white/10 hover:bg-white/20 text-white" 
+                className="flex-1 bg-slate-100 hover:bg-white/20 text-slate-900" 
                 onClick={() => setClassToDelete(null)}
               >
                 Batal
               </GlassButton>
               <GlassButton 
                 variant="primary" 
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white border-red-500/50" 
+                className="flex-1 bg-red-600 hover:bg-red-700 text-slate-900 border-red-500/50" 
                 onClick={handleDeleteClass}
                 disabled={deleteConfirmText !== classToDelete.nama_kelas || isDeleting}
               >

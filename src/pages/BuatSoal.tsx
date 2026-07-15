@@ -79,15 +79,15 @@ export default function BuatSoal() {
     <DashboardLayout>
       <div className="max-w-4xl mx-auto pb-12">
         <h1 className="text-3xl font-bold mb-2">Buat Soal Baru</h1>
-        <p className="text-gray-400 mb-8">Masukkan deskripsi soal dan kunci jawaban untuk setiap representasi.</p>
+        <p className="text-slate-500 mb-8">Masukkan deskripsi soal dan kunci jawaban untuk setiap representasi.</p>
         
         <form onSubmit={handleSubmit} className="space-y-8">
           <GlassCard className="space-y-6">
-            <h2 className="text-xl font-semibold border-b border-white/10 pb-4">Informasi Umum</h2>
+            <h2 className="text-xl font-semibold border-b border-slate-200 pb-4">Informasi Umum</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Judul Soal</label>
+                <label className="block text-sm font-medium text-slate-600 mb-2">Judul Soal</label>
                 <input 
                   name="judul" 
                   value={formData.judul} 
@@ -98,7 +98,7 @@ export default function BuatSoal() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Topik</label>
+                <label className="block text-sm font-medium text-slate-600 mb-2">Topik</label>
                 <input 
                   name="topik" 
                   value={formData.topik} 
@@ -109,7 +109,7 @@ export default function BuatSoal() {
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Tugaskan ke Kelas (Pilih Kelas)</label>
+                <label className="block text-sm font-medium text-slate-600 mb-2">Tugaskan ke Kelas (Pilih Kelas)</label>
                 <select 
                   name="kelas_id" 
                   value={formData.kelas_id} 
@@ -119,7 +119,7 @@ export default function BuatSoal() {
                 >
                   <option value="" disabled>-- Pilih Kelas --</option>
                   {kelasList.map(k => (
-                    <option key={k.id} value={k.id} className="bg-dark-900">{k.nama_kelas}</option>
+                    <option key={k.id} value={k.id} className="bg-slate-50">{k.nama_kelas}</option>
                   ))}
                 </select>
                 {kelasList.length === 0 && (
@@ -129,7 +129,7 @@ export default function BuatSoal() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Deskripsi Soal</label>
+              <label className="block text-sm font-medium text-slate-600 mb-2">Deskripsi Soal</label>
               <textarea 
                 name="soal_text" 
                 value={formData.soal_text} 
@@ -142,33 +142,33 @@ export default function BuatSoal() {
           </GlassCard>
 
           <GlassCard className="space-y-6">
-            <h2 className="text-xl font-semibold border-b border-white/10 pb-4">Kunci Jawaban 4 Representasi</h2>
-            <p className="text-sm text-gray-400 -mt-2 mb-4">Kunci ini akan digunakan AI untuk mengevaluasi jawaban siswa.</p>
+            <h2 className="text-xl font-semibold border-b border-slate-200 pb-4">Kunci Jawaban 4 Representasi</h2>
+            <p className="text-sm text-slate-500 -mt-2 mb-4">Kunci ini akan digunakan AI untuk mengevaluasi jawaban siswa.</p>
 
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+                <label className="block text-sm font-medium text-slate-600 mb-2 flex items-center">
                   <span className="w-3 h-3 rounded-full bg-primary-glow mr-2"></span> Representasi Verbal
                 </label>
                 <textarea name="kunci_verbal" value={formData.kunci_verbal} onChange={handleChange} className="glass-input w-full min-h-[100px]" placeholder="Penjelasan konsep dengan kata-kata..." required />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+                <label className="block text-sm font-medium text-slate-600 mb-2 flex items-center">
                   <span className="w-3 h-3 rounded-full bg-secondary-glow mr-2"></span> Representasi Matematik
                 </label>
                 <textarea name="kunci_matematik" value={formData.kunci_matematik} onChange={handleChange} className="glass-input w-full min-h-[100px]" placeholder="Persamaan dan perhitungan..." required />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+                <label className="block text-sm font-medium text-slate-600 mb-2 flex items-center">
                   <span className="w-3 h-3 rounded-full bg-accent mr-2"></span> Representasi Grafik
                 </label>
                 <textarea name="kunci_grafik" value={formData.kunci_grafik} onChange={handleChange} className="glass-input w-full min-h-[100px]" placeholder="Deskripsi bentuk kurva/grafik yang benar..." required />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+                <label className="block text-sm font-medium text-slate-600 mb-2 flex items-center">
                   <span className="w-3 h-3 rounded-full bg-emerald-400 mr-2"></span> Representasi Visual / Fisik
                 </label>
                 <textarea name="kunci_visual" value={formData.kunci_visual} onChange={handleChange} className="glass-input w-full min-h-[100px]" placeholder="Deskripsi Free-Body Diagram atau ilustrasi..." required />

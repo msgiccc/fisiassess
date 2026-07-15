@@ -11,8 +11,8 @@ export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
 
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-900">
-        <Loader2 className="w-10 h-10 text-primary-glow animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="w-10 h-10 text-slate-900 animate-spin" />
       </div>
     );
   }

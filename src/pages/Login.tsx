@@ -54,15 +54,14 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark-900 p-6 relative">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-hero-glow rounded-full blur-[100px] opacity-40 pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6 relative font-sans">
       
       <GlassCard className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <Link to="/" className="text-3xl font-bold text-white tracking-tight inline-block mb-2">
-            Fisi<span className="text-primary-glow">Assess.</span>
+          <Link to="/" className="text-3xl font-bold text-slate-900 tracking-tight inline-block mb-2">
+            Fisi<span className="text-slate-900">Assess.</span>
           </Link>
-          <h2 className="text-xl text-gray-400">Selamat datang kembali</h2>
+          <h2 className="text-xl text-slate-500">Selamat datang kembali</h2>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
@@ -94,8 +93,8 @@ export default function Login() {
           </GlassButton>
         </form>
 
-        <p className="mt-8 text-center text-gray-400 text-sm">
-          Belum punya akun? <Link to="/register" className="text-primary-glow hover:underline">Daftar sekarang</Link>
+        <p className="mt-8 text-center text-slate-500 text-sm">
+          Belum punya akun? <Link to="/register" className="text-slate-900 hover:underline">Daftar sekarang</Link>
         </p>
       </GlassCard>
     </div>
