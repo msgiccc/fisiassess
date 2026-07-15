@@ -14,6 +14,7 @@ import DetailSoalGuru from './pages/DetailSoalGuru';
 import ManajemenKelas from './pages/ManajemenKelas';
 import JoinKelas from './pages/JoinKelas';
 import Tentang from './pages/Tentang';
+import ProtectedRoute from './components/layout/ProtectedRoute';
 
 function App() {
   const initialize = useAuthStore(state => state.initialize);
@@ -40,15 +41,27 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<DashboardGuru />} />
-        <Route path="/dashboard-siswa" element={<DashboardSiswa />} />
-        <Route path="/buat-soal" element={<BuatSoal />} />
-        <Route path="/kerjakan/:id" element={<KerjakanSoal />} />
-        <Route path="/hasil/:id" element={<HasilSoal />} />
-        <Route path="/soal/:id" element={<DetailSoalGuru />} />
-        <Route path="/kelas" element={<ManajemenKelas />} />
-        <Route path="/join/:kode" element={<JoinKelas />} />
         <Route path="/tentang" element={<Tentang />} />
+        <Route path="/join/:kode" element={<JoinKelas />} />
+        
+        {/* Protected Routes untuk Guru */}
+        <Route element={<ProtectedRoute allowedRoles={['guru']} />}>
+          <Route path="/dashboard" element={<DashboardGuru />} />
+          <Route path="/buat-soal" element={<BuatSoal />} />
+          <Route path="/soal/:id" element={<DetailSoalGuru />} />
+          <Route path="/kelas" element={<ManajemenKelas />} />
+        </Route>
+
+        {/* Protected Routes untuk Siswa */}
+        <Route element={<ProtectedRoute allowedRoles={['siswa']} />}>
+          <Route path="/dashboard-siswa" element={<DashboardSiswa />} />
+          <Route path="/kerjakan/:id" element={<KerjakanSoal />} />
+        </Route>
+
+        {/* Protected Routes untuk Keduanya */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/hasil/:id" element={<HasilSoal />} />
+        </Route>
       </Routes>
     </Router>
     </>

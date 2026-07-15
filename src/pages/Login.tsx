@@ -34,7 +34,12 @@ export default function Login() {
         .eq('id', data.user.id)
         .single();
         
-      if (profile?.role === 'guru') {
+      const redirectPath = localStorage.getItem('redirectAfterLogin');
+      
+      if (redirectPath) {
+        localStorage.removeItem('redirectAfterLogin');
+        navigate(redirectPath);
+      } else if (profile?.role === 'guru') {
         navigate('/dashboard');
       } else {
         navigate('/dashboard-siswa');
