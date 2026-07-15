@@ -129,22 +129,40 @@ Format Output:
 {"verbal":{"skor":number,"feedback":"..."},"matematik":{"skor":number,"feedback":"..."},"grafik":{"skor":number,"feedback":"..."},"visual":{"skor":number,"feedback":"..."}}`;
 
         let response;
-        let retries = 3;
+        let retries = 2;
         let delayMs = 2000;
         
         while (retries > 0) {
-          response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              model: "meta-llama/llama-3.3-70b-instruct:free", 
-              messages: [{ role: "user", content: prompt }],
-              temperature: 0.1,
-            }),
-          });
+          // Coba gunakan Groq jika kunci API tersedia (karena limitnya lebih longgar untuk bulk)
+          const groqKey = import.meta.env.VITE_GROQ_API_KEY;
+          
+          if (groqKey) {
+            response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${groqKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "llama-3.3-70b-versatile", 
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.1,
+              }),
+            });
+          } else {
+            response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "meta-llama/llama-3.3-70b-instruct:free", 
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.1,
+              }),
+            });
+          }
 
           if (response.ok) break;
 
