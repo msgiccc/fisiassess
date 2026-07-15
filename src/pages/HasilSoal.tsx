@@ -66,16 +66,32 @@ export default function HasilSoal() {
   if (loading) return <DashboardLayout><p className="p-8">Memuat hasil evaluasi...</p></DashboardLayout>;
   if (!jawaban) return <DashboardLayout><p className="p-8 text-red-400">Hasil tidak ditemukan.</p></DashboardLayout>;
 
-  const data = [
-    { representasi: 'Verbal', skor: jawaban.skor_verbal, fullMark: 100 },
-    { representasi: 'Matematik', skor: jawaban.skor_matematik, fullMark: 100 },
-    { representasi: 'Grafik', skor: jawaban.skor_grafik, fullMark: 100 },
-    { representasi: 'Visual', skor: jawaban.skor_visual, fullMark: 100 },
-  ];
+  const data = [];
+  let total = 0;
+  let activeCount = 0;
+  
+  if (soal.kunci_verbal) {
+    data.push({ representasi: 'Verbal', skor: jawaban.skor_verbal, fullMark: 100 });
+    total += (jawaban.skor_verbal || 0);
+    activeCount++;
+  }
+  if (soal.kunci_matematik) {
+    data.push({ representasi: 'Matematik', skor: jawaban.skor_matematik, fullMark: 100 });
+    total += (jawaban.skor_matematik || 0);
+    activeCount++;
+  }
+  if (soal.kunci_grafik) {
+    data.push({ representasi: 'Grafik', skor: jawaban.skor_grafik, fullMark: 100 });
+    total += (jawaban.skor_grafik || 0);
+    activeCount++;
+  }
+  if (soal.kunci_visual) {
+    data.push({ representasi: 'Visual', skor: jawaban.skor_visual, fullMark: 100 });
+    total += (jawaban.skor_visual || 0);
+    activeCount++;
+  }
 
-  const totalScore = Math.round(
-    (jawaban.skor_verbal + jawaban.skor_matematik + jawaban.skor_grafik + jawaban.skor_visual) / 4
-  );
+  const totalScore = activeCount > 0 ? Math.round(total / activeCount) : 0;
 
   return (
     <DashboardLayout>
@@ -85,7 +101,7 @@ export default function HasilSoal() {
         </Link>
 
         <h1 className="text-3xl font-bold mb-2">Hasil Evaluasi: {soal?.judul}</h1>
-        <p className="text-slate-500 mb-8">Dianalisis secara otomatis berdasarkan 4 representasi fisika.</p>
+        <p className="text-slate-500 mb-8">Dianalisis secara otomatis berdasarkan {activeCount} representasi fisika.</p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Radar Chart Section */}
@@ -113,6 +129,7 @@ export default function HasilSoal() {
           {/* Feedback Section */}
           <div className="lg:col-span-2 space-y-4">
             
+            {soal.kunci_verbal && (
             <GlassCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-semibold flex items-center">
@@ -124,7 +141,9 @@ export default function HasilSoal() {
                 {feedbacks.verbal || 'Tidak ada feedback.'}
               </p>
             </GlassCard>
+            )}
 
+            {soal.kunci_matematik && (
             <GlassCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-semibold flex items-center">
@@ -136,7 +155,9 @@ export default function HasilSoal() {
                 {feedbacks.matematik || 'Tidak ada feedback.'}
               </p>
             </GlassCard>
+            )}
 
+            {soal.kunci_grafik && (
             <GlassCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-semibold flex items-center">
@@ -148,7 +169,9 @@ export default function HasilSoal() {
                 {feedbacks.grafik || 'Tidak ada feedback.'}
               </p>
             </GlassCard>
+            )}
 
+            {soal.kunci_visual && (
             <GlassCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-semibold flex items-center">
@@ -160,6 +183,7 @@ export default function HasilSoal() {
                 {feedbacks.visual || 'Tidak ada feedback.'}
               </p>
             </GlassCard>
+            )}
 
           </div>
         </div>

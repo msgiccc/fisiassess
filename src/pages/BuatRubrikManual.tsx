@@ -5,45 +5,78 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
-import { Save, ArrowLeft } from 'lucide-react';
+import { Save, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+type RubrikLevel = { s100: string; s75: string; s50: string; s25: string; s0: string };
 
 export default function BuatRubrikManual() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState({
-    judul: '',
-    kunci_verbal: '',
-    kunci_matematik: '',
-    kunci_grafik: '',
-    kunci_visual: ''
+  const [judul, setJudul] = useState('');
+  
+  const [activeReps, setActiveReps] = useState({
+    verbal: true,
+    matematik: true,
+    grafik: true,
+    visual: true
   });
+
+  const [rubriks, setRubriks] = useState<Record<string, RubrikLevel>>({
+    verbal: { s100: '', s75: '', s50: '', s25: '', s0: '' },
+    matematik: { s100: '', s75: '', s50: '', s25: '', s0: '' },
+    grafik: { s100: '', s75: '', s50: '', s25: '', s0: '' },
+    visual: { s100: '', s75: '', s50: '', s25: '', s0: '' }
+  });
+
+  const [openTab, setOpenTab] = useState<string | null>('verbal');
+
+  const handleRubrikChange = (rep: string, level: keyof RubrikLevel, value: string) => {
+    setRubriks(prev => ({
+      ...prev,
+      [rep]: {
+        ...prev[rep],
+        [level]: value
+      }
+    }));
+  };
+
+  const formatRubrik = (rep: string) => {
+    const r = rubriks[rep];
+    return `Skor 100:\n${r.s100}\n\nSkor 75:\n${r.s75}\n\nSkor 50:\n${r.s50}\n\nSkor 25:\n${r.s25}\n\nSkor 0:\n${r.s0}`;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    
+    // Validasi minimum 1 representasi aktif
+    if (!activeReps.verbal && !activeReps.matematik && !activeReps.grafik && !activeReps.visual) {
+      toast.error('Pilih setidaknya 1 representasi untuk dinilai.');
+      return;
+    }
 
     try {
       setLoading(true);
       const { error } = await supabase.from('assessment_soal').insert([
         {
           guru_id: user.id,
-          judul: formData.judul,
+          judul: judul,
           soal_text: 'EVALUASI MANUAL VIA EXCEL',
           topik: 'MANUAL_EVAL',
-          kunci_verbal: formData.kunci_verbal,
-          kunci_matematik: formData.kunci_matematik,
-          kunci_grafik: formData.kunci_grafik,
-          kunci_visual: formData.kunci_visual,
+          kunci_verbal: activeReps.verbal ? formatRubrik('verbal') : '',
+          kunci_matematik: activeReps.matematik ? formatRubrik('matematik') : '',
+          kunci_grafik: activeReps.grafik ? formatRubrik('grafik') : '',
+          kunci_visual: activeReps.visual ? formatRubrik('visual') : '',
           aktif: true
         }
       ]);
 
       if (error) throw error;
 
-      toast.success('Rubrik manual berhasil dibuat!');
+      toast.success('Rubrik manual bertingkat berhasil dibuat!');
       navigate('/input-esai');
     } catch (error: any) {
       toast.error(error.message);
@@ -52,9 +85,55 @@ export default function BuatRubrikManual() {
     }
   };
 
+  const renderRubrikForm = (rep: string, title: string, colorClass: string) => {
+    if (!activeReps[rep as keyof typeof activeReps]) return null;
+    
+    const isOpen = openTab === rep;
+    
+    return (
+      <div className="border border-slate-200 rounded-xl overflow-hidden mb-4 bg-white">
+        <button 
+          type="button"
+          onClick={() => setOpenTab(isOpen ? null : rep)}
+          className={`w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors ${isOpen ? 'border-b border-slate-200' : ''}`}
+        >
+          <div className="flex items-center gap-3">
+            <span className={`w-3 h-3 rounded-full ${colorClass}`}></span>
+            <span className="font-bold text-slate-700">Rubrik: {title}</span>
+          </div>
+          {isOpen ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
+        </button>
+        
+        {isOpen && (
+          <div className="p-6 space-y-6">
+            {[
+              { level: 's100', label: 'Skor 100 (Sangat Baik / Lengkap)' },
+              { level: 's75', label: 'Skor 75 (Baik / Sebagian Besar Benar)' },
+              { level: 's50', label: 'Skor 50 (Cukup / Setengah Benar)' },
+              { level: 's25', label: 'Skor 25 (Kurang / Hanya Sedikit Benar)' },
+              { level: 's0', label: 'Skor 0 (Salah Total / Kosong)' }
+            ].map(item => (
+              <div key={item.level}>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">{item.label}</label>
+                <textarea
+                  required
+                  rows={2}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none text-sm"
+                  placeholder="Kriteria & Contoh Jawaban..."
+                  value={rubriks[rep][item.level as keyof RubrikLevel]}
+                  onChange={(e) => handleRubrikChange(rep, item.level as keyof RubrikLevel, e.target.value)}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8 pb-12">
         <div className="flex items-center space-x-4">
           <Link to="/input-esai">
             <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-slate-50 transition-colors shadow-sm border border-slate-100">
@@ -63,70 +142,51 @@ export default function BuatRubrikManual() {
           </Link>
           <div>
             <h1 className="text-3xl font-bold font-heading text-slate-900">Buat Rubrik Manual</h1>
-            <p className="text-slate-500">Tentukan kunci jawaban yang akan digunakan AI untuk menilai file Excel Anda.</p>
+            <p className="text-slate-500">Tentukan kriteria bertingkat yang akan digunakan AI untuk menilai file Excel Anda.</p>
           </div>
         </div>
 
         <GlassCard className="p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Judul Rubrik / Tugas</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Judul Evaluasi Manual</label>
               <input
-                type="text"
                 required
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                placeholder="Contoh: Tugas Hukum Newton 1"
-                value={formData.judul}
-                onChange={(e) => setFormData({ ...formData, judul: e.target.value })}
+                placeholder="Contoh: Evaluasi Ulangan Harian Dinamika"
+                value={judul}
+                onChange={(e) => setJudul(e.target.value)}
               />
             </div>
-
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg text-slate-800 border-b border-slate-100 pb-2">Kunci Jawaban 4 Representasi</h3>
-              
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Kunci Representasi Verbal (Penjelasan Konsep)</label>
-                <textarea
-                  required
-                  rows={3}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                  value={formData.kunci_verbal}
-                  onChange={(e) => setFormData({ ...formData, kunci_verbal: e.target.value })}
-                />
+            
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-3">Pilih Representasi yang Dinilai</label>
+              <div className="flex flex-wrap gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input type="checkbox" checked={activeReps.verbal} onChange={(e) => setActiveReps({...activeReps, verbal: e.target.checked})} className="w-4 h-4 text-primary rounded" />
+                  <span className="font-semibold text-slate-700">Verbal</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input type="checkbox" checked={activeReps.matematik} onChange={(e) => setActiveReps({...activeReps, matematik: e.target.checked})} className="w-4 h-4 text-primary rounded" />
+                  <span className="font-semibold text-slate-700">Matematik</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input type="checkbox" checked={activeReps.grafik} onChange={(e) => setActiveReps({...activeReps, grafik: e.target.checked})} className="w-4 h-4 text-primary rounded" />
+                  <span className="font-semibold text-slate-700">Grafik</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input type="checkbox" checked={activeReps.visual} onChange={(e) => setActiveReps({...activeReps, visual: e.target.checked})} className="w-4 h-4 text-primary rounded" />
+                  <span className="font-semibold text-slate-700">Visual / Fisik</span>
+                </label>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Kunci Representasi Matematik (Rumus & Perhitungan)</label>
-                <textarea
-                  required
-                  rows={3}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                  value={formData.kunci_matematik}
-                  onChange={(e) => setFormData({ ...formData, kunci_matematik: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Kunci Representasi Grafik (Analisis Grafik)</label>
-                <textarea
-                  required
-                  rows={3}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                  value={formData.kunci_grafik}
-                  onChange={(e) => setFormData({ ...formData, kunci_grafik: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Kunci Representasi Visual / Fisik (Gambar / Diagram)</label>
-                <textarea
-                  required
-                  rows={3}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                  value={formData.kunci_visual}
-                  onChange={(e) => setFormData({ ...formData, kunci_visual: e.target.value })}
-                />
-              </div>
+            <div>
+              <h3 className="font-semibold text-lg text-slate-800 border-b border-slate-100 pb-2 mb-4">Pengaturan Rubrik Bertingkat</h3>
+              {renderRubrikForm('verbal', 'Representasi Verbal', 'bg-primary-glow')}
+              {renderRubrikForm('matematik', 'Representasi Matematik', 'bg-secondary-glow')}
+              {renderRubrikForm('grafik', 'Representasi Grafik', 'bg-accent')}
+              {renderRubrikForm('visual', 'Representasi Visual / Fisik', 'bg-emerald-400')}
             </div>
 
             <div className="pt-4 border-t border-slate-100 flex justify-end">

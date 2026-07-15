@@ -40,11 +40,25 @@ export default function DetailSoalGuru() {
 
       if (jawabanError) throw jawabanError;
 
-      // Hitung skor rata-rata untuk masing-masing siswa
-      const formattedJawaban = jawabanData?.map((j: any) => ({
-        ...j,
-        totalSkor: Math.round((j.skor_verbal + j.skor_matematik + j.skor_grafik + j.skor_visual) / 4)
-      })) || [];
+      const hasVerbal = !!soalData.kunci_verbal;
+      const hasMatematik = !!soalData.kunci_matematik;
+      const hasGrafik = !!soalData.kunci_grafik;
+      const hasVisual = !!soalData.kunci_visual;
+      const activeCount = [hasVerbal, hasMatematik, hasGrafik, hasVisual].filter(Boolean).length || 1;
+
+      // Hitung skor rata-rata untuk masing-masing siswa (hanya untuk representasi aktif)
+      const formattedJawaban = jawabanData?.map((j: any) => {
+        let total = 0;
+        if (hasVerbal) total += (j.skor_verbal || 0);
+        if (hasMatematik) total += (j.skor_matematik || 0);
+        if (hasGrafik) total += (j.skor_grafik || 0);
+        if (hasVisual) total += (j.skor_visual || 0);
+        
+        return {
+          ...j,
+          totalSkor: Math.round(total / activeCount)
+        };
+      }) || [];
 
       setJawabanList(formattedJawaban);
 
@@ -111,10 +125,10 @@ export default function DetailSoalGuru() {
                 <tr className="border-b border-slate-200 text-slate-500 text-sm">
                   <th className="pb-3 px-4 font-medium">Nama Siswa</th>
                   <th className="pb-3 px-4 font-medium">NIM/NISN</th>
-                  <th className="pb-3 px-4 font-medium text-center">Verbal</th>
-                  <th className="pb-3 px-4 font-medium text-center">Matematik</th>
-                  <th className="pb-3 px-4 font-medium text-center">Grafik</th>
-                  <th className="pb-3 px-4 font-medium text-center">Visual</th>
+                  {soal.kunci_verbal && <th className="pb-3 px-4 font-medium text-center">Verbal</th>}
+                  {soal.kunci_matematik && <th className="pb-3 px-4 font-medium text-center">Matematik</th>}
+                  {soal.kunci_grafik && <th className="pb-3 px-4 font-medium text-center">Grafik</th>}
+                  {soal.kunci_visual && <th className="pb-3 px-4 font-medium text-center">Visual</th>}
                   <th className="pb-3 px-4 font-medium text-center text-slate-900">Total Skor</th>
                 </tr>
               </thead>
@@ -137,10 +151,10 @@ export default function DetailSoalGuru() {
                       <tr key={j.id} className="border-b border-white/5 hover:bg-slate-50 transition-colors">
                         <td className="py-4 px-4 font-medium">{j.profiles?.nama || namaExcel || 'Siswa Tanpa Nama'}</td>
                         <td className="py-4 px-4 text-slate-500">{j.profiles?.nim || '-'}</td>
-                        <td className="py-4 px-4 text-center text-slate-900">{j.skor_verbal}</td>
-                        <td className="py-4 px-4 text-center text-slate-700">{j.skor_matematik}</td>
-                        <td className="py-4 px-4 text-center text-accent">{j.skor_grafik}</td>
-                        <td className="py-4 px-4 text-center text-emerald-400">{j.skor_visual}</td>
+                        {soal.kunci_verbal && <td className="py-4 px-4 text-center text-slate-900">{j.skor_verbal || 0}</td>}
+                        {soal.kunci_matematik && <td className="py-4 px-4 text-center text-slate-700">{j.skor_matematik || 0}</td>}
+                        {soal.kunci_grafik && <td className="py-4 px-4 text-center text-accent">{j.skor_grafik || 0}</td>}
+                        {soal.kunci_visual && <td className="py-4 px-4 text-center text-emerald-400">{j.skor_visual || 0}</td>}
                         <td className="py-4 px-4 text-center font-bold text-slate-900 text-lg">{j.totalSkor}</td>
                       </tr>
                     );

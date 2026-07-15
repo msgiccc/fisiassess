@@ -23,6 +23,12 @@ export default function BuatSoal() {
     kunci_grafik: '',
     kunci_visual: '',
   });
+  const [activeReps, setActiveReps] = useState({
+    verbal: true,
+    matematik: true,
+    grafik: true,
+    visual: true
+  });
 
   useEffect(() => {
     if (user?.id) fetchKelas();
@@ -55,10 +61,10 @@ export default function BuatSoal() {
           topik: formData.topik,
           kelas_id: formData.kelas_id || null,
           soal_text: formData.soal_text,
-          kunci_verbal: formData.kunci_verbal,
-          kunci_matematik: formData.kunci_matematik,
-          kunci_grafik: formData.kunci_grafik,
-          kunci_visual: formData.kunci_visual,
+          kunci_verbal: activeReps.verbal ? formData.kunci_verbal : '',
+          kunci_matematik: activeReps.matematik ? formData.kunci_matematik : '',
+          kunci_grafik: activeReps.grafik ? formData.kunci_grafik : '',
+          kunci_visual: activeReps.visual ? formData.kunci_visual : '',
           aktif: true
         }
       ]);
@@ -142,37 +148,64 @@ export default function BuatSoal() {
           </GlassCard>
 
           <GlassCard className="space-y-6">
-            <h2 className="text-xl font-semibold border-b border-slate-200 pb-4">Kunci Jawaban 4 Representasi</h2>
-            <p className="text-sm text-slate-500 -mt-2 mb-4">Kunci ini akan digunakan oleh sistem untuk mengevaluasi jawaban siswa.</p>
+            <h2 className="text-xl font-semibold border-b border-slate-200 pb-4">Kunci Jawaban Representasi</h2>
+            <p className="text-sm text-slate-500 -mt-2 mb-4">Pilih representasi mana saja yang akan diujikan, lalu isi kunci jawabannya.</p>
+
+            <div className="flex flex-wrap gap-4 mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" checked={activeReps.verbal} onChange={(e) => setActiveReps({...activeReps, verbal: e.target.checked})} className="w-4 h-4 text-primary rounded focus:ring-primary" />
+                <span className="font-semibold text-slate-700">Verbal</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" checked={activeReps.matematik} onChange={(e) => setActiveReps({...activeReps, matematik: e.target.checked})} className="w-4 h-4 text-primary rounded focus:ring-primary" />
+                <span className="font-semibold text-slate-700">Matematik</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" checked={activeReps.grafik} onChange={(e) => setActiveReps({...activeReps, grafik: e.target.checked})} className="w-4 h-4 text-primary rounded focus:ring-primary" />
+                <span className="font-semibold text-slate-700">Grafik</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" checked={activeReps.visual} onChange={(e) => setActiveReps({...activeReps, visual: e.target.checked})} className="w-4 h-4 text-primary rounded focus:ring-primary" />
+                <span className="font-semibold text-slate-700">Visual / Fisik</span>
+              </label>
+            </div>
 
             <div className="space-y-6">
+              {activeReps.verbal && (
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-2 flex items-center">
                   <span className="w-3 h-3 rounded-full bg-primary-glow mr-2"></span> Representasi Verbal
                 </label>
                 <textarea name="kunci_verbal" value={formData.kunci_verbal} onChange={handleChange} className="glass-input w-full min-h-[100px]" placeholder="Penjelasan konsep dengan kata-kata..." required />
               </div>
+              )}
               
+              {activeReps.matematik && (
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-2 flex items-center">
                   <span className="w-3 h-3 rounded-full bg-secondary-glow mr-2"></span> Representasi Matematik
                 </label>
                 <textarea name="kunci_matematik" value={formData.kunci_matematik} onChange={handleChange} className="glass-input w-full min-h-[100px]" placeholder="Persamaan dan perhitungan..." required />
               </div>
+              )}
 
+              {activeReps.grafik && (
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-2 flex items-center">
                   <span className="w-3 h-3 rounded-full bg-accent mr-2"></span> Representasi Grafik
                 </label>
                 <textarea name="kunci_grafik" value={formData.kunci_grafik} onChange={handleChange} className="glass-input w-full min-h-[100px]" placeholder="Deskripsi bentuk kurva/grafik yang benar..." required />
               </div>
+              )}
 
+              {activeReps.visual && (
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-2 flex items-center">
                   <span className="w-3 h-3 rounded-full bg-emerald-400 mr-2"></span> Representasi Visual / Fisik
                 </label>
                 <textarea name="kunci_visual" value={formData.kunci_visual} onChange={handleChange} className="glass-input w-full min-h-[100px]" placeholder="Deskripsi Free-Body Diagram atau ilustrasi..." required />
               </div>
+              )}
             </div>
           </GlassCard>
 

@@ -59,12 +59,17 @@ export default function KerjakanSoal() {
     const toastId = toast.loading('Sedang memproses penilaian otomatis... (Ini mungkin memakan waktu beberapa detik)');
     
     try {
-      // Panggil OpenRouter API untuk ke-4 representasi secara paralel
+      const evaluateTask = async (kunci: string, jaw: string, nama: string) => {
+        if (!kunci) return { skor: 0, feedback: null };
+        return evaluateAnswer(soal.soal_text, kunci, jaw, nama);
+      };
+
+      // Panggil OpenRouter API untuk representasi yang aktif secara paralel
       const [hasilVerbal, hasilMatematik, hasilGrafik, hasilVisual] = await Promise.all([
-        evaluateAnswer(soal.soal_text, soal.kunci_verbal, jawaban.verbal, "Verbal"),
-        evaluateAnswer(soal.soal_text, soal.kunci_matematik, jawaban.matematik, "Matematik"),
-        evaluateAnswer(soal.soal_text, soal.kunci_grafik, jawaban.grafik, "Grafik"),
-        evaluateAnswer(soal.soal_text, soal.kunci_visual, jawaban.visual, "Visual / Fisik"),
+        evaluateTask(soal.kunci_verbal, jawaban.verbal, "Verbal"),
+        evaluateTask(soal.kunci_matematik, jawaban.matematik, "Matematik"),
+        evaluateTask(soal.kunci_grafik, jawaban.grafik, "Grafik"),
+        evaluateTask(soal.kunci_visual, jawaban.visual, "Visual / Fisik"),
       ]);
 
       const feedbackString = JSON.stringify({
@@ -137,6 +142,7 @@ export default function KerjakanSoal() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           
+          {soal.kunci_verbal && (
           <GlassCard>
             <label className="block text-lg font-medium text-slate-900 mb-2 flex items-center">
               <span className="w-3 h-3 rounded-full bg-primary-glow mr-3"></span> 1. Representasi Verbal
@@ -144,7 +150,9 @@ export default function KerjakanSoal() {
             <p className="text-sm text-slate-500 mb-4">Jelaskan dengan kata-kata gaya apa saja yang bekerja dan bagaimana pengaruhnya terhadap gerak benda.</p>
             <textarea name="verbal" onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
           </GlassCard>
+          )}
 
+          {soal.kunci_matematik && (
           <GlassCard>
             <label className="block text-lg font-medium text-slate-900 mb-2 flex items-center">
               <span className="w-3 h-3 rounded-full bg-secondary-glow mr-3"></span> 2. Representasi Matematik
@@ -152,7 +160,9 @@ export default function KerjakanSoal() {
             <p className="text-sm text-slate-500 mb-4">Tuliskan rumus hukum Newton dan hitung nilai percepatan balok (g = 10 m/s²).</p>
             <textarea name="matematik" onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
           </GlassCard>
+          )}
 
+          {soal.kunci_grafik && (
           <GlassCard>
             <label className="block text-lg font-medium text-slate-900 mb-2 flex items-center">
               <span className="w-3 h-3 rounded-full bg-accent mr-3"></span> 3. Representasi Grafik
@@ -160,7 +170,9 @@ export default function KerjakanSoal() {
             <p className="text-sm text-slate-500 mb-4">Deskripsikan bentuk grafik hubungan antara kecepatan (v) dan waktu (t).</p>
             <textarea name="grafik" onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
           </GlassCard>
+          )}
 
+          {soal.kunci_visual && (
           <GlassCard>
             <label className="block text-lg font-medium text-slate-900 mb-2 flex items-center">
               <span className="w-3 h-3 rounded-full bg-emerald-400 mr-3"></span> 4. Representasi Visual / Fisik
@@ -168,6 +180,7 @@ export default function KerjakanSoal() {
             <p className="text-sm text-slate-500 mb-4">Deskripsikan arah vektor gaya berat (w), gaya normal (N), dan komponen gaya yang menyebabkan benda meluncur.</p>
             <textarea name="visual" onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
           </GlassCard>
+          )}
 
           <div className="flex justify-end pt-4">
             <GlassButton type="submit" variant="primary" className="flex items-center space-x-2 px-8" disabled={isSubmitting}>
