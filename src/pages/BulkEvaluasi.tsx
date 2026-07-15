@@ -128,62 +128,78 @@ Jawaban: ${row['Visual'] || ''}
 Format Output:
 {"verbal":{"skor":number,"feedback":"..."},"matematik":{"skor":number,"feedback":"..."},"grafik":{"skor":number,"feedback":"..."},"visual":{"skor":number,"feedback":"..."}}`;
 
-        let response;
+        let evalResult = null;
         let retries = 5;
         let delayMs = 3000;
+        let lastError = "";
         
         while (retries > 0) {
-          // Hanya ada OpenRouter API Key
-          response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              // Gunakan openrouter/free yang otomatis mencari model gratis apa saja yang sedang tidak sibuk!
-              model: "openrouter/free", 
-              messages: [{ role: "user", content: prompt }],
-              temperature: 0.1,
-            }),
-          });
+          try {
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "openrouter/free", 
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.1,
+                response_format: { type: "json_object" }
+              }),
+            });
 
-          if (response.ok) break;
+            if (response.status === 429) {
+              const errText = await response.text();
+              let waitTime = delayMs;
+              try {
+                const errJson = JSON.parse(errText);
+                if (errJson.error?.metadata?.retry_after_seconds) {
+                  waitTime = (errJson.error.metadata.retry_after_seconds + 1) * 1000;
+                }
+              } catch (e) {}
+              
+              console.warn(`Rate limited. Retrying in ${waitTime}ms...`);
+              await new Promise(r => setTimeout(r, waitTime));
+              retries--;
+              delayMs *= 2;
+              lastError = "API Limit (429)";
+              continue;
+            }
 
-          if (response.status === 429) {
-            const errText = await response.text();
-            let waitTime = delayMs;
-            try {
-              const errJson = JSON.parse(errText);
-              if (errJson.error?.metadata?.retry_after_seconds) {
-                waitTime = (errJson.error.metadata.retry_after_seconds + 1) * 1000;
-              }
-            } catch (e) {}
+            if (!response.ok) {
+              const errText = await response.text();
+              throw new Error(`API HTTP ${response.status}: ${errText}`);
+            }
+
+            const data = await response.json();
+            let content = data.choices[0].message.content.trim();
             
-            console.warn(`Rate limited. Retrying in ${waitTime}ms...`);
-            await new Promise(r => setTimeout(r, waitTime));
-            retries--;
-            delayMs *= 2; // Exponential backoff
-          } else {
-            const errText = await response.text();
-            throw new Error(`API HTTP ${response.status}: ${errText}`);
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) {
+              throw new Error(`Invalid AI Output (No JSON): ${content.substring(0, 50)}...`);
+            }
+            
+            evalResult = JSON.parse(jsonMatch[0]);
+            
+            // Validasi field wajib
+            if (evalResult && typeof evalResult === 'object') {
+              break; // Berhasil! Keluar dari loop.
+            } else {
+               throw new Error("Parsed JSON is not an object.");
+            }
+            
+          } catch (e: any) {
+             lastError = e.message;
+             console.warn(`Attempt failed: ${e.message}. Retrying...`);
+             await new Promise(r => setTimeout(r, 2000));
+             retries--;
           }
         }
 
-        if (!response || !response.ok) {
-          throw new Error(`API Limit / Timeout setelah beberapa kali percobaan.`);
+        if (!evalResult) {
+          throw new Error(`Gagal setelah 5 kali percobaan. Error Terakhir: ${lastError.substring(0,40)}`);
         }
-
-        const data = await response.json();
-        let content = data.choices[0].message.content.trim();
-        
-        // Ekstrak JSON menggunakan regex untuk menghindari teks tambahan dari AI
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-          throw new Error(`Invalid AI Output: ${content.substring(0, 50)}...`);
-        }
-        
-        const evalResult = JSON.parse(jsonMatch[0]);
 
         const totalSkor = Math.round(((evalResult.verbal?.skor || 0) + (evalResult.matematik?.skor || 0) + (evalResult.grafik?.skor || 0) + (evalResult.visual?.skor || 0)) / 4);
 
