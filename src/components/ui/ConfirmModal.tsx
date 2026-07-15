@@ -10,6 +10,7 @@ interface ConfirmModalProps {
   cancelText?: string;
   onConfirm: () => void;
   onCancel: () => void;
+  children?: React.ReactNode;
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -19,7 +20,8 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   confirmText = 'Konfirmasi',
   cancelText = 'Batal',
   onConfirm,
-  onCancel
+  onCancel,
+  children
 }) => {
   if (!isOpen) return null;
 
@@ -40,7 +42,9 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </div>
           
           <h3 className="text-xl font-bold text-slate-900 mb-2">{title}</h3>
-          <p className="text-slate-500 mb-8">{message}</p>
+          <p className="text-slate-500 mb-6">{message}</p>
+          
+          {children && <div className="mb-8">{children}</div>}
           
           <div className="flex gap-3 justify-end">
             <button 

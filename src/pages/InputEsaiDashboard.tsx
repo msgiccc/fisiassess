@@ -15,10 +15,25 @@ export default function InputEsaiDashboard() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRubrik, setSelectedRubrik] = useState<any>(null);
+  
+  const [kelasList, setKelasList] = useState<any[]>([]);
+  const [selectedKelas, setSelectedKelas] = useState('');
+  const [topikInput, setTopikInput] = useState('');
 
   useEffect(() => {
     fetchRubriks();
+    if (user?.id) fetchKelas();
   }, [user]);
+
+  const fetchKelas = async () => {
+    const { data } = await supabase
+      .from('classes')
+      .select('id, nama_kelas')
+      .eq('guru_id', user?.id)
+      .order('created_at', { ascending: false });
+    
+    if (data) setKelasList(data);
+  };
 
   const fetchRubriks = async () => {
     if (!user) return;
@@ -41,18 +56,29 @@ export default function InputEsaiDashboard() {
 
   const handleCopyClick = (rubrik: any) => {
     setSelectedRubrik(rubrik);
+    setSelectedKelas('');
+    setTopikInput('');
     setModalOpen(true);
   };
 
   const copyToOnline = async () => {
     if (!selectedRubrik) return;
+    if (!selectedKelas) {
+      toast.error('Silakan pilih kelas terlebih dahulu');
+      return;
+    }
+    if (!topikInput) {
+      toast.error('Silakan masukkan topik soal');
+      return;
+    }
     try {
       const { id, created_at, ...rest } = selectedRubrik;
       const { error } = await supabase
         .from('assessment_soal')
         .insert([{ 
           ...rest, 
-          topik: 'Umum',
+          topik: topikInput,
+          kelas_id: selectedKelas,
           judul: `${rest.judul} (Salinan Online)`
         }]);
       
@@ -149,11 +175,37 @@ export default function InputEsaiDashboard() {
       <ConfirmModal
         isOpen={modalOpen}
         title="Salin ke Soal Online"
-        message={`Apakah Anda yakin ingin membuat salinan dari rubrik "${selectedRubrik?.judul}" menjadi soal evaluasi online interaktif biasa?`}
+        message={`Apakah Anda yakin ingin membuat salinan dari rubrik "${selectedRubrik?.judul}" menjadi soal evaluasi online interaktif biasa? Silakan tentukan kelas dan topik untuk salinan ini.`}
         confirmText="Salin Soal"
         onConfirm={copyToOnline}
         onCancel={() => setModalOpen(false)}
-      />
+      >
+        <div className="space-y-4 text-left">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Pilih Kelas</label>
+            <select
+              value={selectedKelas}
+              onChange={(e) => setSelectedKelas(e.target.value)}
+              className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+            >
+              <option value="">-- Pilih Kelas --</option>
+              {kelasList.map(k => (
+                <option key={k.id} value={k.id}>{k.nama_kelas}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Topik Soal</label>
+            <input
+              type="text"
+              value={topikInput}
+              onChange={(e) => setTopikInput(e.target.value)}
+              className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+              placeholder="Contoh: Dinamika Newton"
+            />
+          </div>
+        </div>
+      </ConfirmModal>
     </DashboardLayout>
   );
 }
