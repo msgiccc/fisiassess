@@ -13,7 +13,8 @@ export default function Register() {
   const [role, setRole] = useState<'guru' | 'siswa'>('siswa');
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'register' | 'verify'>('register');
-  const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
+  const OTP_LENGTH = 7;
+  const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
   const initialize = useAuthStore(state => state.initialize);
@@ -54,7 +55,7 @@ export default function Register() {
     setOtp(newOtp);
 
     // Auto-advance to next input
-    if (value && index < 5) {
+    if (value && index < OTP_LENGTH - 1) {
       otpRefs.current[index + 1]?.focus();
     }
   };
@@ -70,18 +71,18 @@ export default function Register() {
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    if (pasted.length === 6) {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH);
+    if (pasted.length === OTP_LENGTH) {
       const newOtp = pasted.split('');
       setOtp(newOtp);
-      otpRefs.current[5]?.focus();
+      otpRefs.current[OTP_LENGTH - 1]?.focus();
     }
   };
 
   const handleVerifyOtp = async () => {
     const token = otp.join('');
-    if (token.length !== 6) {
-      toast.error('Masukkan 6 digit kode verifikasi.');
+    if (token.length !== OTP_LENGTH) {
+      toast.error('Masukkan kode verifikasi dengan benar.');
       return;
     }
 
@@ -243,7 +244,7 @@ export default function Register() {
             </div>
             <h1 className="text-3xl font-heading text-slate-900 mb-3">Verifikasi Email</h1>
             <p className="text-sm text-slate-500">
-              Kami telah mengirimkan kode 6 digit ke{' '}
+              Kami telah mengirimkan kode verifikasi ke{' '}
               <span className="font-semibold text-slate-900">{email}</span>
             </p>
           </div>
@@ -277,7 +278,7 @@ export default function Register() {
             type="button"
             variant="primary"
             className="w-full mb-4"
-            disabled={loading || otp.join('').length !== 6}
+            disabled={loading || otp.join('').length !== OTP_LENGTH}
             onClick={handleVerifyOtp}
           >
             {loading ? 'Memverifikasi...' : 'Verifikasi'}
