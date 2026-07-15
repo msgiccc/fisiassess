@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
@@ -12,6 +12,7 @@ type RubrikLevel = { s100: string; s75: string; s50: string; s25: string; s0: st
 
 export default function BuatRubrikManual() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
 
@@ -32,6 +33,51 @@ export default function BuatRubrikManual() {
   });
 
   const [openTab, setOpenTab] = useState<string | null>('verbal');
+
+  useEffect(() => {
+    if (id) fetchRubrikForEdit();
+  }, [id]);
+
+  const parseRubrik = (text: string) => {
+    if (!text) return { s100: '', s75: '', s50: '', s25: '', s0: '' };
+    const parts = text.split(/Skor 100:|Skor 75:|Skor 50:|Skor 25:|Skor 0:/);
+    return {
+      s100: parts[1] ? parts[1].trim() : '',
+      s75: parts[2] ? parts[2].trim() : '',
+      s50: parts[3] ? parts[3].trim() : '',
+      s25: parts[4] ? parts[4].trim() : '',
+      s0: parts[5] ? parts[5].trim() : ''
+    };
+  };
+
+  const fetchRubrikForEdit = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('assessment_soal')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+      if (data) {
+        setJudul(data.judul || '');
+        setActiveReps({
+          verbal: !!data.kunci_verbal,
+          matematik: !!data.kunci_matematik,
+          grafik: !!data.kunci_grafik,
+          visual: !!data.kunci_visual,
+        });
+        setRubriks({
+          verbal: parseRubrik(data.kunci_verbal),
+          matematik: parseRubrik(data.kunci_matematik),
+          grafik: parseRubrik(data.kunci_grafik),
+          visual: parseRubrik(data.kunci_visual)
+        });
+      }
+    } catch (e) {
+      toast.error('Gagal mengambil data rubrik');
+    }
+  };
 
   const handleRubrikChange = (rep: string, level: keyof RubrikLevel, value: string) => {
     setRubriks(prev => ({
@@ -60,23 +106,28 @@ export default function BuatRubrikManual() {
 
     try {
       setLoading(true);
-      const { error } = await supabase.from('assessment_soal').insert([
-        {
-          guru_id: user.id,
-          judul: judul,
-          soal_text: 'EVALUASI MANUAL VIA EXCEL',
-          topik: 'MANUAL_EVAL',
-          kunci_verbal: activeReps.verbal ? formatRubrik('verbal') : '',
-          kunci_matematik: activeReps.matematik ? formatRubrik('matematik') : '',
-          kunci_grafik: activeReps.grafik ? formatRubrik('grafik') : '',
-          kunci_visual: activeReps.visual ? formatRubrik('visual') : '',
-          aktif: true
-        }
-      ]);
+      const payload = {
+        guru_id: user.id,
+        judul: judul,
+        soal_text: 'EVALUASI MANUAL VIA EXCEL',
+        topik: 'MANUAL_EVAL',
+        kunci_verbal: activeReps.verbal ? formatRubrik('verbal') : '',
+        kunci_matematik: activeReps.matematik ? formatRubrik('matematik') : '',
+        kunci_grafik: activeReps.grafik ? formatRubrik('grafik') : '',
+        kunci_visual: activeReps.visual ? formatRubrik('visual') : '',
+        aktif: true
+      };
 
-      if (error) throw error;
+      if (id) {
+        const { error } = await supabase.from('assessment_soal').update(payload).eq('id', id);
+        if (error) throw error;
+        toast.success('Rubrik manual bertingkat berhasil diperbarui!');
+      } else {
+        const { error } = await supabase.from('assessment_soal').insert([payload]);
+        if (error) throw error;
+        toast.success('Rubrik manual bertingkat berhasil dibuat!');
+      }
 
-      toast.success('Rubrik manual bertingkat berhasil dibuat!');
       navigate('/input-esai');
     } catch (error: any) {
       toast.error(error.message);

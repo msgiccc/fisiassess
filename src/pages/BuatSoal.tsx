@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 
 export default function BuatSoal() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [kelasList, setKelasList] = useState<any[]>([]);
@@ -32,7 +33,40 @@ export default function BuatSoal() {
 
   useEffect(() => {
     if (user?.id) fetchKelas();
-  }, [user]);
+    if (id) fetchSoalForEdit();
+  }, [user, id]);
+
+  const fetchSoalForEdit = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('assessment_soal')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+      if (data) {
+        setFormData({
+          judul: data.judul || '',
+          topik: data.topik || '',
+          kelas_id: data.kelas_id || '',
+          soal_text: data.soal_text || '',
+          kunci_verbal: data.kunci_verbal || '',
+          kunci_matematik: data.kunci_matematik || '',
+          kunci_grafik: data.kunci_grafik || '',
+          kunci_visual: data.kunci_visual || '',
+        });
+        setActiveReps({
+          verbal: !!data.kunci_verbal,
+          matematik: !!data.kunci_matematik,
+          grafik: !!data.kunci_grafik,
+          visual: !!data.kunci_visual,
+        });
+      }
+    } catch (e) {
+      toast.error('Gagal mengambil data soal');
+    }
+  };
 
   const fetchKelas = async () => {
     const { data } = await supabase
@@ -54,28 +88,32 @@ export default function BuatSoal() {
     
     setLoading(true);
     try {
-      const { error } = await supabase.from('assessment_soal').insert([
-        {
-          guru_id: user.id,
-          judul: formData.judul,
-          topik: formData.topik,
-          kelas_id: formData.kelas_id || null,
-          soal_text: formData.soal_text,
-          kunci_verbal: activeReps.verbal ? formData.kunci_verbal : '',
-          kunci_matematik: activeReps.matematik ? formData.kunci_matematik : '',
-          kunci_grafik: activeReps.grafik ? formData.kunci_grafik : '',
-          kunci_visual: activeReps.visual ? formData.kunci_visual : '',
-          aktif: true
-        }
-      ]);
+      const payload = {
+        guru_id: user.id,
+        judul: formData.judul,
+        topik: formData.topik,
+        kelas_id: formData.kelas_id || null,
+        soal_text: formData.soal_text,
+        kunci_verbal: activeReps.verbal ? formData.kunci_verbal : '',
+        kunci_matematik: activeReps.matematik ? formData.kunci_matematik : '',
+        kunci_grafik: activeReps.grafik ? formData.kunci_grafik : '',
+        kunci_visual: activeReps.visual ? formData.kunci_visual : '',
+        aktif: true
+      };
 
-      if (error) throw error;
-      
-      toast.success('Berhasil menyimpan soal!');
+      if (id) {
+        const { error } = await supabase.from('assessment_soal').update(payload).eq('id', id);
+        if (error) throw error;
+        toast.success('Soal berhasil diperbarui!');
+      } else {
+        const { error } = await supabase.from('assessment_soal').insert([payload]);
+        if (error) throw error;
+        toast.success('Soal berhasil dibuat!');
+      }
+
       navigate('/dashboard');
     } catch (error: any) {
-      toast.error('Gagal menyimpan soal. Pastikan skema tabel assessment_soal sudah ada.');
-      console.error(error);
+      toast.error(error.message || 'Terjadi kesalahan saat menyimpan soal');
     } finally {
       setLoading(false);
     }
@@ -84,8 +122,10 @@ export default function BuatSoal() {
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto pb-12">
-        <h1 className="text-3xl font-bold mb-2">Buat Soal Baru</h1>
-        <p className="text-slate-500 mb-8">Masukkan deskripsi soal dan kunci jawaban untuk setiap representasi.</p>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold font-heading mb-2">{id ? 'Edit Soal' : 'Buat Soal Baru'}</h1>
+          <p className="text-slate-500">{id ? 'Modifikasi detail soal dan rubrik yang sudah ada.' : 'Rancang soal fisika komprehensif beserta rubrik penilaian AI.'}</p>
+        </div>
         
         <form onSubmit={handleSubmit} className="space-y-8">
           <GlassCard className="space-y-6">
@@ -212,7 +252,7 @@ export default function BuatSoal() {
           <div className="flex justify-end">
             <GlassButton type="submit" variant="primary" className="flex items-center space-x-2" disabled={loading}>
               <Save className="w-5 h-5" />
-              <span>{loading ? 'Menyimpan...' : 'Simpan Soal'}</span>
+              <span>{loading ? 'Menyimpan...' : (id ? 'Update Soal' : 'Simpan Soal')}</span>
             </GlassButton>
           </div>
         </form>

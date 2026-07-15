@@ -3,7 +3,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
 import { useAuthStore } from '../store/authStore';
 import { supabase } from '../lib/supabase';
-import { Users, BookOpen, CheckCircle } from 'lucide-react';
+import { Users, BookOpen, CheckCircle, Edit, ArrowRightLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -57,6 +57,22 @@ export default function DashboardGuru() {
       toast.error('Gagal mengambil data soal dari database.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const moveToManual = async (id: string) => {
+    if (!window.confirm('Yakin ingin memindahkan soal ini ke mode Input Esai Manual? Soal ini akan hilang dari Dashboard Online.')) return;
+    try {
+      const { error } = await supabase
+        .from('assessment_soal')
+        .update({ topik: 'MANUAL_EVAL', kelas_id: null })
+        .eq('id', id);
+      
+      if (error) throw error;
+      toast.success('Soal berhasil dipindahkan ke mode Input Esai Manual!');
+      fetchSoal();
+    } catch (e: any) {
+      toast.error('Gagal memindahkan: ' + e.message);
     }
   };
 
@@ -138,12 +154,26 @@ export default function DashboardGuru() {
                         {soal.aktif ? 'Aktif' : 'Draft'}
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-right">
+                    <td className="py-4 px-4 text-right space-x-3">
+                      <button 
+                        onClick={() => moveToManual(soal.id)}
+                        className="text-amber-600 hover:text-amber-800 transition-colors"
+                        title="Pindahkan ke Input Manual"
+                      >
+                        <ArrowRightLeft className="w-4 h-4 inline" />
+                      </button>
+                      <Link 
+                        to={`/edit-soal/${soal.id}`}
+                        className="text-primary hover:text-primary-light transition-colors"
+                        title="Edit Soal"
+                      >
+                        <Edit className="w-4 h-4 inline" />
+                      </Link>
                       <Link 
                         to={`/soal/${soal.id}`}
                         className="text-slate-900 text-sm hover:underline"
                       >
-                        Lihat Detail
+                        Detail
                       </Link>
                     </td>
                   </tr>

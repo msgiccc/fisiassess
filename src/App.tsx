@@ -54,9 +54,11 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['guru']} />}>
           <Route path="/dashboard" element={<DashboardGuru />} />
           <Route path="/buat-soal" element={<BuatSoal />} />
+          <Route path="/edit-soal/:id" element={<BuatSoal />} />
           <Route path="/soal/:id" element={<DetailSoalGuru />} />
           <Route path="/input-esai" element={<InputEsaiDashboard />} />
           <Route path="/input-esai/buat" element={<BuatRubrikManual />} />
+          <Route path="/input-esai/edit/:id" element={<BuatRubrikManual />} />
           <Route path="/input-esai/:id" element={<BulkEvaluasi />} />
           <Route path="/kelas" element={<ManajemenKelas />} />
         </Route>
