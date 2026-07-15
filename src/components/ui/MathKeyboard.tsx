@@ -1,9 +1,17 @@
-import React from 'react';
-import Latex from 'react-latex-next';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 interface MathKeyboardProps {
   onInsert: (symbol: string) => void;
 }
+
+const renderMath = (math: string) => {
+  try {
+    return { __html: katex.renderToString(math, { throwOnError: false }) };
+  } catch (e) {
+    return { __html: math };
+  }
+};
 
 const symbolCategories = [
   {
@@ -98,9 +106,9 @@ export const MathKeyboard: React.FC<MathKeyboardProps> = ({ onInsert }) => {
                   type="button"
                   onClick={() => onInsert(sym.value)}
                   title={sym.value}
-                  className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-primary-pale hover:text-primary hover:border-primary/30 transition-colors shadow-sm flex items-center justify-center min-w-[40px]"
+                  className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-primary-pale hover:text-primary hover:border-primary/30 transition-colors shadow-sm flex items-center justify-center min-w-[40px] [&_.katex-mathml]:hidden"
                 >
-                  <Latex>{`$${sym.label}$`}</Latex>
+                  <span dangerouslySetInnerHTML={renderMath(sym.label)} />
                 </button>
               ))}
             </div>
