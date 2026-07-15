@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
@@ -45,8 +45,10 @@ export default function InputEsaiDashboard() {
             <p className="text-slate-500">Buat rubrik dan unggah file Excel untuk mengevaluasi jawaban siswa secara massal.</p>
           </div>
           <Link to="/input-esai/buat">
-            <GlassButton icon={<PlusCircle className="w-5 h-5" />} variant="primary">
-              Buat Rubrik Baru
+            <GlassButton variant="primary">
+              <span className="flex items-center gap-2">
+                <PlusCircle className="w-5 h-5" /> Buat Rubrik Baru
+              </span>
             </GlassButton>
           </Link>
         </div>

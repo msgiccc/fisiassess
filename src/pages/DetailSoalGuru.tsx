@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
 import { supabase } from '../lib/supabase';
-import { ArrowLeft, Users, Trophy, FileSpreadsheet } from 'lucide-react';
+import { ArrowLeft, Users, Trophy } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function DetailSoalGuru() {

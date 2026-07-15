@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuthStore } from '../store/authStore';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { ArrowLeft, Upload, Play, CheckCircle, FileSpreadsheet, Download, Search, X } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -17,7 +16,6 @@ interface ExcelDataRow {
 
 export default function BulkEvaluasi() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuthStore();
   const [soal, setSoal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   

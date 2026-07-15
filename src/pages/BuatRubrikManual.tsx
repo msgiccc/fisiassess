@@ -131,8 +131,10 @@ export default function BuatRubrikManual() {
             </div>
 
             <div className="pt-4 border-t border-slate-100 flex justify-end">
-              <GlassButton type="submit" variant="primary" icon={<Save className="w-5 h-5" />} disabled={loading}>
-                {loading ? 'Menyimpan...' : 'Simpan Rubrik'}
+              <GlassButton type="submit" variant="primary" disabled={loading}>
+                <span className="flex items-center gap-2">
+                  <Save className="w-5 h-5" /> {loading ? 'Menyimpan...' : 'Simpan Rubrik'}
+                </span>
               </GlassButton>
             </div>
           </form>

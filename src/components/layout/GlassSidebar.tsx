@@ -23,9 +23,9 @@ export function GlassSidebar() {
   ];
 
   const menuSiswa = [
-    { name: 'Dashboard', path: '/dashboard-siswa', icon: Home },
-    { name: 'Daftar Tugas', path: '#', icon: FileText },
-    { name: 'Pengaturan', path: '#', icon: Settings },
+    { name: 'Dashboard', path: '/dashboard-siswa', icon: Home, isDivider: false },
+    { name: 'Daftar Tugas', path: '#', icon: FileText, isDivider: false },
+    { name: 'Pengaturan', path: '#', icon: Settings, isDivider: false },
   ];
 
   const menu = user?.role === 'guru' ? menuGuru : menuSiswa;
