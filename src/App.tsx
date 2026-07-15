@@ -10,6 +10,9 @@ import DashboardSiswa from './pages/DashboardSiswa';
 import BuatSoal from './pages/BuatSoal';
 import KerjakanSoal from './pages/KerjakanSoal';
 import HasilSoal from './pages/HasilSoal';
+import DetailSoalGuru from './pages/DetailSoalGuru';
+import ManajemenKelas from './pages/ManajemenKelas';
+import JoinKelas from './pages/JoinKelas';
 import Tentang from './pages/Tentang';
 
 function App() {
@@ -42,6 +45,9 @@ function App() {
         <Route path="/buat-soal" element={<BuatSoal />} />
         <Route path="/kerjakan/:id" element={<KerjakanSoal />} />
         <Route path="/hasil/:id" element={<HasilSoal />} />
+        <Route path="/soal/:id" element={<DetailSoalGuru />} />
+        <Route path="/kelas" element={<ManajemenKelas />} />
+        <Route path="/join/:kode" element={<JoinKelas />} />
         <Route path="/tentang" element={<Tentang />} />
       </Routes>
     </Router>

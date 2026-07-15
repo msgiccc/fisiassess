@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { GlassSidebar } from './GlassSidebar';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {

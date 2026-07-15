@@ -11,6 +11,7 @@ export default function DashboardGuru() {
   const { user } = useAuthStore();
   const [soalList, setSoalList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ totalSiswa: 0, rataRata: 0 });
 
   useEffect(() => {
     if (user?.id) {
@@ -28,6 +29,28 @@ export default function DashboardGuru() {
 
       if (error) throw error;
       setSoalList(data || []);
+
+      // Ambil jawaban untuk menghitung statistik (Total Siswa unik & Rata-rata Skor)
+      if (data && data.length > 0) {
+        const soalIds = data.map((s) => s.id);
+        const { data: jawabanData, error: jawabanError } = await supabase
+          .from('assessment_jawaban')
+          .select('siswa_id, skor_verbal, skor_matematik, skor_grafik, skor_visual')
+          .in('soal_id', soalIds);
+
+        if (jawabanError) throw jawabanError;
+
+        if (jawabanData && jawabanData.length > 0) {
+          const uniqueSiswa = new Set(jawabanData.map((j) => j.siswa_id)).size;
+          const totalSkorAll = jawabanData.reduce((acc, curr) => {
+            return acc + ((curr.skor_verbal + curr.skor_matematik + curr.skor_grafik + curr.skor_visual) / 4);
+          }, 0);
+          const rataRata = Math.round(totalSkorAll / jawabanData.length);
+          
+          setStats({ totalSiswa: uniqueSiswa, rataRata });
+        }
+      }
+
     } catch (error: any) {
       console.error(error);
       toast.error('Gagal mengambil data soal dari database.');
@@ -60,7 +83,7 @@ export default function DashboardGuru() {
           </div>
           <div>
             <p className="text-gray-400 text-sm">Total Siswa</p>
-            <p className="text-2xl font-bold">-</p>
+            <p className="text-2xl font-bold">{loading ? '-' : stats.totalSiswa}</p>
           </div>
         </GlassCard>
 
@@ -69,8 +92,8 @@ export default function DashboardGuru() {
             <CheckCircle className="text-accent w-6 h-6" />
           </div>
           <div>
-            <p className="text-gray-400 text-sm">Rata-rata Skor</p>
-            <p className="text-2xl font-bold">-</p>
+            <p className="text-gray-400 text-sm">Rata-rata Skor Keseluruhan</p>
+            <p className="text-2xl font-bold">{loading ? '-' : stats.rataRata}</p>
           </div>
         </GlassCard>
       </div>
@@ -115,12 +138,12 @@ export default function DashboardGuru() {
                       </span>
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <button 
-                        onClick={() => toast('Halaman detail soal segera hadir!', { icon: '🚧' })}
+                      <Link 
+                        to={`/soal/${soal.id}`}
                         className="text-primary-glow text-sm hover:underline"
                       >
                         Lihat Detail
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))

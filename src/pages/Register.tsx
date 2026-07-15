@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
-import { useAuthStore } from '../store/authStore';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
+import { MailCheck } from 'lucide-react';
 
 export default function Register() {
   const [role, setRole] = useState<'guru' | 'siswa'>('siswa');
@@ -13,8 +13,8 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verificationRequired, setVerificationRequired] = useState(false);
   
-  const initialize = useAuthStore(state => state.initialize);
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -22,32 +22,31 @@ export default function Register() {
     setLoading(true);
 
     try {
-      // 1. Register with Supabase Auth
+      // Register with Supabase Auth and pass profile data as metadata
+      // A trigger in Supabase will automatically insert this into the profiles table
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            nama: name,
+            nim: nim,
+            role: role
+          }
+        }
       });
 
       if (authError) throw authError;
 
       if (authData.user) {
-        // 2. Insert into profiles table
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            { id: authData.user.id, nama: name, nim, role }
-          ]);
-
-        if (profileError) {
-          // If profile fails, log the error but still try to initialize
-          console.error('Profile creation error:', profileError);
-          toast.error('Gagal membuat profil pengguna. Pastikan skema database sudah dikonfigurasi.');
+        // If session is null, it means email verification is required
+        if (!authData.session) {
+          setVerificationRequired(true);
         } else {
-          toast.success('Pendaftaran berhasil!');
+          // If somehow email verification is off, go to login
+          toast.success('Pendaftaran berhasil! Silakan login.');
+          navigate('/login');
         }
-
-        await initialize();
-        navigate(role === 'guru' ? '/dashboard' : '/dashboard-siswa');
       }
     } catch (error: any) {
       toast.error(error.message || 'Gagal mendaftar.');
@@ -55,6 +54,43 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+  if (verificationRequired) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dark-900 p-6 relative">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-hero-glow rounded-full blur-[100px] opacity-40 pointer-events-none" />
+        
+        <GlassCard className="w-full max-w-md relative z-10 text-center">
+          <div className="flex justify-center mb-6">
+            <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
+              <MailCheck className="text-primary-glow w-10 h-10" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-4">Verifikasi Email</h2>
+          <p className="text-gray-300 mb-8 leading-relaxed">
+            Link verifikasi telah dikirimkan ke <strong className="text-white">{email}</strong>. 
+            Silakan cek kotak masuk (atau spam) email Anda dan klik link tersebut untuk mengaktifkan akun.
+          </p>
+          
+          <div className="space-y-4">
+            <GlassButton 
+              variant="primary" 
+              className="w-full"
+              onClick={() => navigate('/login')}
+            >
+              Jika sudah diverifikasi, klik di sini untuk Login
+            </GlassButton>
+            <button 
+              onClick={() => setVerificationRequired(false)}
+              className="text-gray-400 text-sm hover:text-white transition-colors"
+            >
+              Ganti email pendaftaran
+            </button>
+          </div>
+        </GlassCard>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-dark-900 p-6 relative">

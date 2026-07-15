@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
@@ -12,16 +12,31 @@ export default function BuatSoal() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
+  const [kelasList, setKelasList] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     judul: '',
     topik: '',
-    kelas: '',
+    kelas_id: '',
     soal_text: '',
     kunci_verbal: '',
     kunci_matematik: '',
     kunci_grafik: '',
     kunci_visual: '',
   });
+
+  useEffect(() => {
+    if (user?.id) fetchKelas();
+  }, [user]);
+
+  const fetchKelas = async () => {
+    const { data } = await supabase
+      .from('classes')
+      .select('id, nama_kelas')
+      .eq('guru_id', user?.id)
+      .order('created_at', { ascending: false });
+    
+    if (data) setKelasList(data);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,7 +53,7 @@ export default function BuatSoal() {
           guru_id: user.id,
           judul: formData.judul,
           topik: formData.topik,
-          kelas: formData.kelas,
+          kelas_id: formData.kelas_id || null,
           soal_text: formData.soal_text,
           kunci_verbal: formData.kunci_verbal,
           kunci_matematik: formData.kunci_matematik,
@@ -94,14 +109,22 @@ export default function BuatSoal() {
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Kelas (Opsional)</label>
-                <input 
-                  name="kelas" 
-                  value={formData.kelas} 
-                  onChange={handleChange}
+                <label className="block text-sm font-medium text-gray-300 mb-2">Tugaskan ke Kelas (Pilih Kelas)</label>
+                <select 
+                  name="kelas_id" 
+                  value={formData.kelas_id} 
+                  onChange={handleChange as any}
                   className="glass-input w-full md:w-1/2" 
-                  placeholder="Contoh: X MIPA 1" 
-                />
+                  required
+                >
+                  <option value="" disabled>-- Pilih Kelas --</option>
+                  {kelasList.map(k => (
+                    <option key={k.id} value={k.id} className="bg-dark-900">{k.nama_kelas}</option>
+                  ))}
+                </select>
+                {kelasList.length === 0 && (
+                  <p className="text-red-400 text-xs mt-2">Anda belum membuat kelas. Silakan buat kelas terlebih dahulu di menu Manajemen Kelas.</p>
+                )}
               </div>
             </div>
 

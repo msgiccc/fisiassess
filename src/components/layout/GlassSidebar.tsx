@@ -16,7 +16,7 @@ export function GlassSidebar() {
   const menuGuru = [
     { name: 'Dashboard', path: '/dashboard', icon: Home },
     { name: 'Buat Soal', path: '/buat-soal', icon: PlusCircle },
-    { name: 'Siswa', path: '#', icon: Users },
+    { name: 'Kelas & Siswa', path: '/kelas', icon: Users },
     { name: 'Pengaturan', path: '#', icon: Settings },
   ];
 

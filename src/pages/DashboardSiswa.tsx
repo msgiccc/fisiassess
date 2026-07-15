@@ -21,19 +21,35 @@ export default function DashboardSiswa() {
 
   const fetchSoal = async () => {
     try {
-      // Ambil semua soal aktif
-      const { data: soalData, error: soalError } = await supabase
-        .from('assessment_soal')
-        .select(`
-          id,
-          judul,
-          guru_id,
-          profiles:guru_id ( nama )
-        `)
-        .eq('aktif', true)
-        .order('created_at', { ascending: false });
+      // Ambil ID kelas yang diikuti siswa
+      const { data: myClasses, error: classError } = await supabase
+        .from('class_members')
+        .select('kelas_id')
+        .eq('siswa_id', user?.id);
 
-      if (soalError) throw soalError;
+      if (classError) throw classError;
+
+      const myClassIds = myClasses?.map(c => c.kelas_id) || [];
+
+      let soalData: any[] = [];
+
+      if (myClassIds.length > 0) {
+        // Ambil semua soal aktif yang ditugaskan ke kelas siswa
+        const { data, error: soalError } = await supabase
+          .from('assessment_soal')
+          .select(`
+            id,
+            judul,
+            guru_id,
+            profiles:guru_id ( nama )
+          `)
+          .eq('aktif', true)
+          .in('kelas_id', myClassIds)
+          .order('created_at', { ascending: false });
+
+        if (soalError) throw soalError;
+        soalData = data || [];
+      }
 
       // Ambil riwayat jawaban siswa
       const { data: jawabanData, error: jawabanError } = await supabase
@@ -54,7 +70,7 @@ export default function DashboardSiswa() {
       const formattedList = soalData?.map(soal => ({
         id: soal.id,
         judul: soal.judul,
-        guru: soal.profiles?.nama || 'Guru',
+        guru: (soal.profiles as any)?.nama || 'Guru',
         status: jawabanMap.has(soal.id) ? 'Selesai' : 'Belum Dikerjakan',
         skor: jawabanMap.get(soal.id),
       })) || [];
