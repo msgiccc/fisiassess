@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400..900&family=Teachers:wght@400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400..900&family=Teachers:wght@400..800&display=swap');
 
 @layer base {
   body {
@@ -11,7 +11,7 @@
   }
   
   h1, h2, h3, h4, h5, h6, .font-heading {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Lexend', sans-serif;
     letter-spacing: -0.02em;
   }
 }

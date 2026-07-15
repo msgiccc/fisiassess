@@ -26,7 +26,7 @@ export default {
       },
       fontFamily: {
         sans: ['Teachers', 'sans-serif'],
-        heading: ['Outfit', 'sans-serif'],
+        heading: ['Lexend', 'sans-serif'],
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
