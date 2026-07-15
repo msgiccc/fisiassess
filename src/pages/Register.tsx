@@ -40,7 +40,8 @@ export default function Register() {
       setStep('verify');
       toast.success('Kode verifikasi telah dikirim ke email Anda!');
     } catch (error: any) {
-      toast.error(error.message || 'Gagal mendaftar.');
+      const msg = typeof error?.message === 'string' ? error.message : error?.message?.message || 'Gagal mendaftar. Silakan coba lagi.';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
