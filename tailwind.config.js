@@ -7,25 +7,31 @@ export default {
   theme: {
     extend: {
       colors: {
+        dark: {
+          900: '#ffffff', // Overridden to white for light theme compatibility
+          800: '#f8fafc',
+          700: '#f1f5f9',
+        },
         primary: {
-          DEFAULT: '#0d9488', // teal-600
-          light: '#14b8a6',   // teal-500
-          pale: '#f0fdfa',    // teal-50
+          DEFAULT: '#26695c', // Deep Teal
+          glow: '#338776',
         },
-        slate: {
-          50: '#f8fafc',
-          200: '#e2e8f0',
-          500: '#64748b',
-          900: '#0f172a',
+        secondary: {
+          DEFAULT: '#f5b027', // Mustard Yellow
+          glow: '#fbbf42',
         },
-        success: '#22c55e',
-        warning: '#eab308',
-        danger: '#ef4444',
-        info: '#3b82f6',
+        accent: {
+          DEFAULT: '#fcfaf6', // Soft Cream
+        }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Teachers', 'sans-serif'],
+        heading: ['Lexend', 'sans-serif'],
       },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'hero-glow': 'none', // Remove glow
+      }
     },
   },
   plugins: [],
