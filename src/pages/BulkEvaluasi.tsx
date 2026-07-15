@@ -128,22 +128,48 @@ Jawaban: ${row['Visual'] || ''}
 Format Output:
 {"verbal":{"skor":number,"feedback":"..."},"matematik":{"skor":number,"feedback":"..."},"grafik":{"skor":number,"feedback":"..."},"visual":{"skor":number,"feedback":"..."}}`;
 
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "meta-llama/llama-3.3-70b-instruct:free", 
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.1,
-          }),
-        });
+        let response;
+        let retries = 3;
+        let delayMs = 2000;
+        
+        while (retries > 0) {
+          response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "meta-llama/llama-3.3-70b-instruct:free", 
+              messages: [{ role: "user", content: prompt }],
+              temperature: 0.1,
+            }),
+          });
 
-        if (!response.ok) {
-          const errText = await response.text();
-          throw new Error(`API HTTP ${response.status}: ${errText}`);
+          if (response.ok) break;
+
+          if (response.status === 429) {
+            const errText = await response.text();
+            let waitTime = delayMs;
+            try {
+              const errJson = JSON.parse(errText);
+              if (errJson.error?.metadata?.retry_after_seconds) {
+                waitTime = (errJson.error.metadata.retry_after_seconds + 1) * 1000;
+              }
+            } catch (e) {}
+            
+            console.warn(`Rate limited. Retrying in ${waitTime}ms...`);
+            await new Promise(r => setTimeout(r, waitTime));
+            retries--;
+            delayMs *= 2; // Exponential backoff
+          } else {
+            const errText = await response.text();
+            throw new Error(`API HTTP ${response.status}: ${errText}`);
+          }
+        }
+
+        if (!response || !response.ok) {
+          throw new Error(`API Limit / Timeout setelah beberapa kali percobaan.`);
         }
 
         const data = await response.json();
@@ -200,7 +226,7 @@ Format Output:
         });
 
         // Beri jeda kecil antar siswa agar tidak hit rate limit (1 detik)
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 1500));
 
       } catch (err: any) {
         console.error("Bulk Eval Error:", err);
