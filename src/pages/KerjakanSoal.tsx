@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
@@ -8,6 +8,8 @@ import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { evaluateAnswer } from '../lib/openrouter';
 import toast from 'react-hot-toast';
+import Latex from 'react-latex-next';
+import { MathKeyboard } from '../components/ui/MathKeyboard';
 
 export default function KerjakanSoal() {
   const { id } = useParams();
@@ -24,6 +26,26 @@ export default function KerjakanSoal() {
     grafik: '',
     visual: '',
   });
+
+  const mathInputRef = useRef<HTMLTextAreaElement>(null);
+
+  const insertSymbolToMath = (symbol: string) => {
+    const el = mathInputRef.current;
+    if (!el) {
+      setJawaban(prev => ({ ...prev, matematik: prev.matematik + symbol }));
+      return;
+    }
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const val = jawaban.matematik;
+    const newVal = val.substring(0, start) + symbol + val.substring(end);
+    setJawaban(prev => ({ ...prev, matematik: newVal }));
+    
+    setTimeout(() => {
+      el.focus();
+      el.setSelectionRange(start + symbol.length, start + symbol.length);
+    }, 0);
+  };
 
   useEffect(() => {
     if (id) fetchSoal(id);
@@ -135,8 +157,8 @@ export default function KerjakanSoal() {
               <p className="text-sm text-slate-500">Topik: {soal.topik} | Guru: {soal.profiles?.nama || 'Guru'}</p>
             </div>
           </div>
-          <div className="bg-slate-50 rounded-xl p-4 text-gray-200 whitespace-pre-wrap">
-            {soal.soal_text}
+          <div className="bg-slate-50 rounded-xl p-4 text-slate-800 whitespace-pre-wrap leading-relaxed">
+            <Latex>{soal.soal_text}</Latex>
           </div>
         </GlassCard>
 
@@ -148,7 +170,7 @@ export default function KerjakanSoal() {
               <span className="w-3 h-3 rounded-full bg-primary-glow mr-3"></span> 1. Representasi Verbal
             </label>
             <p className="text-sm text-slate-500 mb-4">Jelaskan dengan kata-kata gaya apa saja yang bekerja dan bagaimana pengaruhnya terhadap gerak benda.</p>
-            <textarea name="verbal" onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
+            <textarea name="verbal" value={jawaban.verbal} onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
           </GlassCard>
           )}
 
@@ -158,7 +180,8 @@ export default function KerjakanSoal() {
               <span className="w-3 h-3 rounded-full bg-secondary-glow mr-3"></span> 2. Representasi Matematik
             </label>
             <p className="text-sm text-slate-500 mb-4">Tuliskan rumus hukum Newton dan hitung nilai percepatan balok (g = 10 m/s²).</p>
-            <textarea name="matematik" onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
+            <MathKeyboard onInsert={insertSymbolToMath} />
+            <textarea ref={mathInputRef} name="matematik" value={jawaban.matematik} onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Ketikkan simbol atau rumus Anda..." required />
           </GlassCard>
           )}
 
@@ -168,7 +191,7 @@ export default function KerjakanSoal() {
               <span className="w-3 h-3 rounded-full bg-accent mr-3"></span> 3. Representasi Grafik
             </label>
             <p className="text-sm text-slate-500 mb-4">Deskripsikan bentuk grafik hubungan antara kecepatan (v) dan waktu (t).</p>
-            <textarea name="grafik" onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
+            <textarea name="grafik" value={jawaban.grafik} onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
           </GlassCard>
           )}
 
@@ -178,7 +201,7 @@ export default function KerjakanSoal() {
               <span className="w-3 h-3 rounded-full bg-emerald-400 mr-3"></span> 4. Representasi Visual / Fisik
             </label>
             <p className="text-sm text-slate-500 mb-4">Deskripsikan arah vektor gaya berat (w), gaya normal (N), dan komponen gaya yang menyebabkan benda meluncur.</p>
-            <textarea name="visual" onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
+            <textarea name="visual" value={jawaban.visual} onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Jawaban Anda..." required />
           </GlassCard>
           )}
 
