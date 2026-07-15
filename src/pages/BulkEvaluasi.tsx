@@ -135,7 +135,7 @@ Format Output:
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash", 
+            model: "google/gemini-2.0-flash-lite-preview-02-05:free", 
             messages: [{ role: "user", content: prompt }],
             temperature: 0.1,
           }),
