@@ -6,30 +6,32 @@ export function GlassNavbar() {
   const { isAuthenticated, user } = useAuthStore();
 
   return (
-    <nav className="absolute top-0 left-0 right-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
-        <Link to="/" className="text-2xl font-bold font-heading uppercase text-slate-900 tracking-tight">
-          Fisi<span className="text-slate-500">Assess</span>
+    <nav className="absolute top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-slate-100">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <Link to="/" className="text-2xl font-bold font-heading text-primary tracking-tight flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <span className="text-white text-lg">✦</span>
+          </div>
+          FisiAssess
         </Link>
 
         <div className="hidden md:flex items-center space-x-8">
-          <Link to="/" className="text-sm text-slate-600 hover:text-slate-900 transition-colors uppercase tracking-wider">Beranda</Link>
-          <Link to="/tentang" className="text-sm text-slate-600 hover:text-slate-900 transition-colors uppercase tracking-wider">Tentang</Link>
+          <Link to="/" className="text-sm font-medium text-primary bg-primary/10 px-4 py-2 rounded-full transition-colors">Home</Link>
+          <Link to="/tentang" className="text-sm font-medium text-slate-500 hover:text-primary transition-colors">About Us</Link>
+          <Link to="/kelas" className="text-sm font-medium text-slate-500 hover:text-primary transition-colors">Courses</Link>
+          
           {isAuthenticated ? (
-            <Link to={user?.role === 'guru' ? '/dashboard' : '/dashboard-siswa'}>
-              <GlassButton className="px-6 py-2 border-slate-900 text-slate-900 uppercase text-xs tracking-widest font-bold hover:bg-slate-900 hover:text-slate-900">
+            <Link to={user?.role === 'guru' ? '/dashboard' : '/dashboard-siswa'} className="ml-4">
+              <button className="bg-secondary text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-secondary-glow transition-all shadow-md shadow-secondary/20">
                 Dashboard
-              </GlassButton>
+              </button>
             </Link>
           ) : (
-            <div className="flex items-center space-x-4">
-              <Link to="/login" className="text-sm text-slate-900 font-medium hover:text-slate-600 transition-colors uppercase tracking-wider">
-                Masuk
-              </Link>
-              <Link to="/register">
-                <GlassButton className="px-6 py-2 bg-slate-900 text-slate-900 hover:bg-slate-800 uppercase text-xs tracking-widest font-bold">
-                  Daftar
-                </GlassButton>
+            <div className="flex items-center space-x-4 ml-4">
+              <Link to="/login">
+                <button className="bg-secondary text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-secondary-glow transition-all shadow-md shadow-secondary/20">
+                  Sign In
+                </button>
               </Link>
             </div>
           )}

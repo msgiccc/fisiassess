@@ -13,15 +13,15 @@ export default {
           700: '#f1f5f9',
         },
         primary: {
-          DEFAULT: '#111827', // Almost black
-          glow: '#374151',
+          DEFAULT: '#26695c', // Deep Teal
+          glow: '#338776',
         },
         secondary: {
-          DEFAULT: '#4b5563', // Gray
-          glow: '#6b7280',
+          DEFAULT: '#f5b027', // Mustard Yellow
+          glow: '#fbbf42',
         },
         accent: {
-          DEFAULT: '#000000', // Pure black
+          DEFAULT: '#fcfaf6', // Soft Cream
         }
       },
       fontFamily: {
