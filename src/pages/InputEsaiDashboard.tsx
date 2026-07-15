@@ -73,14 +73,15 @@ export default function InputEsaiDashboard() {
     }
     try {
       const { id, created_at, ...rest } = selectedRubrik;
+      const shortTitle = rest.judul.length > 50 ? rest.judul.substring(0, 50) + '...' : rest.judul;
       const { error } = await supabase
         .from('assessment_soal')
         .insert([{ 
           ...rest, 
           topik: topikInput,
           kelas_id: selectedKelas,
-          soal_text: '',
-          judul: `${rest.judul} (Salinan Online)`
+          soal_text: rest.judul,
+          judul: shortTitle
         }]);
       
       if (error) throw error;
