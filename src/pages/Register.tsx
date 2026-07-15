@@ -67,6 +67,10 @@ export default function Register() {
       await initialize();
       toast.success('Email berhasil diverifikasi! Selamat datang!');
 
+      // Sign in with password to trigger browser's save password prompt
+      await supabase.auth.signInWithPassword({ email, password });
+      await initialize();
+
       if (role === 'guru') {
         navigate('/dashboard');
       } else {
@@ -120,21 +124,25 @@ export default function Register() {
                   onChange={e => setName(e.target.value)}
                   required
                 />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="glass-input w-full text-center"
+                <input 
+                  type="email" 
+                  placeholder="Email" 
+                  className="glass-input w-full text-center" 
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  required
+                  name="email"
+                  autoComplete="email"
+                  required 
                 />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  className="glass-input w-full text-center"
+                <input 
+                  type="password" 
+                  placeholder="Password" 
+                  className="glass-input w-full text-center" 
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  required
+                  name="password"
+                  autoComplete="new-password"
+                  required 
                 />
 
                 <div className="flex gap-4 pt-2">
@@ -227,7 +235,7 @@ export default function Register() {
                 value={otp}
                 onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 10))}
                 onKeyDown={e => { if (e.key === 'Enter') handleVerifyOtp(); }}
-                placeholder="000000"
+                placeholder=""
                 className="glass-input max-w-xs text-center text-2xl font-bold tracking-[0.5em] py-4"
                 autoComplete="one-time-code"
               />
