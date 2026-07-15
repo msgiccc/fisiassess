@@ -31,8 +31,8 @@ OUTPUT HARUS HANYA BERUPA JSON VALID TANPA FORMATTING MARKDOWN. Format:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        // Menggunakan Llama 3.3 70B versi gratis karena Gemini versi gratis sedang dinonaktifkan di OpenRouter
-        model: "meta-llama/llama-3.3-70b-instruct:free", 
+        // Gunakan openrouter/free untuk otomatis me-routing ke model gratis yang tidak sedang sibuk
+        model: "openrouter/free", 
         messages: [{ role: "user", content: prompt }],
         temperature: 0.1, // Suhu rendah agar penilaian konsisten
       }),
