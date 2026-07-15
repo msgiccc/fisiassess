@@ -109,11 +109,11 @@ export default function HasilSoal() {
             <div className="w-48 h-48 mb-6">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
-                  <PolarGrid stroke="rgba(255,255,255,0.2)" />
-                  <PolarAngleAxis dataKey="representasi" stroke="#a1a1aa" fontSize={12} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="rgba(255,255,255,0.1)" />
-                  <Tooltip contentStyle={{ backgroundColor: '#13131f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }} />
-                  <Radar name="Skor Siswa" dataKey="skor" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.5} />
+          <PolarGrid stroke="#d1d5db" strokeOpacity={0.6} />
+                  <PolarAngleAxis dataKey="representasi" stroke="#475569" fontSize={12} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#d1d5db" strokeOpacity={0.4} />
+                  <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#0f172a' }} />
+                  <Radar name="Skor Siswa" dataKey="skor" stroke="#6366f1" fill="#6366f1" fillOpacity={0.3} strokeWidth={2} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
@@ -149,7 +149,7 @@ export default function HasilSoal() {
                 <h3 className="text-lg font-semibold flex items-center">
                   <span className="w-3 h-3 rounded-full bg-secondary-glow mr-3"></span> Matematik
                 </h3>
-                <span className="text-xl font-bold text-slate-700">{jawaban.skor_matematik}/100</span>
+                <span className="text-xl font-bold text-slate-900">{jawaban.skor_matematik}/100</span>
               </div>
               <p className="text-slate-600 text-sm leading-relaxed bg-slate-50 p-4 rounded-xl">
                 {feedbacks.matematik || 'Tidak ada feedback.'}
@@ -163,7 +163,7 @@ export default function HasilSoal() {
                 <h3 className="text-lg font-semibold flex items-center">
                   <span className="w-3 h-3 rounded-full bg-accent mr-3"></span> Grafik
                 </h3>
-                <span className="text-xl font-bold text-accent">{jawaban.skor_grafik}/100</span>
+                <span className="text-xl font-bold text-slate-900">{jawaban.skor_grafik}/100</span>
               </div>
               <p className="text-slate-600 text-sm leading-relaxed bg-slate-50 p-4 rounded-xl">
                 {feedbacks.grafik || 'Tidak ada feedback.'}
@@ -177,7 +177,7 @@ export default function HasilSoal() {
                 <h3 className="text-lg font-semibold flex items-center">
                   <span className="w-3 h-3 rounded-full bg-emerald-400 mr-3"></span> Visual / Fisik
                 </h3>
-                <span className="text-xl font-bold text-emerald-400">{jawaban.skor_visual}/100</span>
+                <span className="text-xl font-bold text-slate-900">{jawaban.skor_visual}/100</span>
               </div>
               <p className="text-slate-600 text-sm leading-relaxed bg-slate-50 p-4 rounded-xl">
                 {feedbacks.visual || 'Tidak ada feedback.'}
