@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GlassButton } from '../components/ui/GlassButton';
 import { supabase } from '../lib/supabase';
+import { useAuthStore } from '../store/authStore';
+import { Mail, ArrowLeft, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Register() {
@@ -10,28 +12,33 @@ export default function Register() {
   const [name, setName] = useState('');
   const [role, setRole] = useState<'guru' | 'siswa'>('siswa');
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<'register' | 'verify'>('register');
+  const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
+  const initialize = useAuthStore(state => state.initialize);
+
+  // Focus first OTP input when entering verify step
+  useEffect(() => {
+    if (step === 'verify') {
+      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+    }
+  }, [step]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            nama: name,
-            role: role,
-          }
+          data: { nama: name, role },
         }
       });
-
       if (error) throw error;
-      
-      toast.success('Registrasi berhasil! Silakan periksa email Anda untuk verifikasi.');
-      navigate('/login');
+      setStep('verify');
+      toast.success('Kode verifikasi telah dikirim ke email Anda!');
     } catch (error: any) {
       toast.error(error.message || 'Gagal mendaftar.');
     } finally {
@@ -39,89 +46,262 @@ export default function Register() {
     }
   };
 
-  return (
-    <div className="min-h-screen flex w-full font-sans">
-      {/* Left Side: Register Form */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-10">
-            <h1 className="text-3xl font-heading text-slate-900 mb-3">Create an Account</h1>
-            <p className="text-sm text-slate-500">Enter your details to register</p>
-          </div>
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1);
+    setOtp(newOtp);
 
-          <form onSubmit={handleRegister} className="space-y-6">
-            <div className="space-y-4">
-              <input 
-                type="text" 
-                placeholder="Nama Lengkap" 
-                className="glass-input w-full text-center" 
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required 
-              />
-              <input 
-                type="email" 
-                placeholder="Email" 
-                className="glass-input w-full text-center" 
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required 
-              />
-              <input 
-                type="password" 
-                placeholder="Password" 
-                className="glass-input w-full text-center" 
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required 
-              />
-              
-              <div className="flex gap-4 pt-2">
-                <label className="flex-1 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="role"
-                    value="siswa"
-                    className="hidden peer"
-                    checked={role === 'siswa'}
-                    onChange={() => setRole('siswa')}
-                  />
-                  <div className="text-center py-3 border border-slate-200 text-slate-500 peer-checked:bg-slate-900 peer-checked:text-white transition-all text-sm uppercase tracking-wider font-medium">
-                    Siswa
-                  </div>
-                </label>
-                <label className="flex-1 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="role"
-                    value="guru"
-                    className="hidden peer"
-                    checked={role === 'guru'}
-                    onChange={() => setRole('guru')}
-                  />
-                  <div className="text-center py-3 border border-slate-200 text-slate-500 peer-checked:bg-slate-900 peer-checked:text-white transition-all text-sm uppercase tracking-wider font-medium">
-                    Guru
-                  </div>
-                </label>
-              </div>
+    // Auto-advance to next input
+    if (value && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+    if (e.key === 'Enter') {
+      handleVerifyOtp();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pasted.length === 6) {
+      const newOtp = pasted.split('');
+      setOtp(newOtp);
+      otpRefs.current[5]?.focus();
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    const token = otp.join('');
+    if (token.length !== 6) {
+      toast.error('Masukkan 6 digit kode verifikasi.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: 'signup',
+      });
+
+      if (error) throw error;
+
+      await initialize();
+      toast.success('Email berhasil diverifikasi! Selamat datang!');
+
+      if (role === 'guru') {
+        navigate('/dashboard');
+      } else {
+        navigate('/dashboard-siswa');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Kode verifikasi salah.');
+      setOtp(['', '', '', '', '', '']);
+      otpRefs.current[0]?.focus();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+      });
+      if (error) throw error;
+      toast.success('Kode verifikasi baru telah dikirim!');
+    } catch (error: any) {
+      toast.error(error.message || 'Gagal mengirim ulang kode.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- REGISTER FORM ---
+  if (step === 'register') {
+    return (
+      <div className="min-h-screen flex w-full font-sans">
+        <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-white">
+          <div className="w-full max-w-md">
+            <div className="text-center mb-10">
+              <h1 className="text-3xl font-heading text-slate-900 mb-3">Buat Akun</h1>
+              <p className="text-sm text-slate-500">Daftar untuk mulai menggunakan FisGrade</p>
             </div>
 
-            <GlassButton type="submit" variant="primary" className="w-full" disabled={loading}>
-              {loading ? 'Memproses...' : 'Sign Up'}
-            </GlassButton>
-          </form>
+            <form onSubmit={handleRegister} className="space-y-6">
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Nama Lengkap"
+                  className="glass-input w-full text-center"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  required
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  className="glass-input w-full text-center"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="glass-input w-full text-center"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                />
 
-          <div className="mt-8 text-center text-sm text-slate-500">
-            Already have an account? <Link to="/login" className="text-slate-900 underline hover:text-slate-700">Log in</Link>
+                <div className="flex gap-4 pt-2">
+                  <label className="flex-1 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="siswa"
+                      className="hidden peer"
+                      checked={role === 'siswa'}
+                      onChange={() => setRole('siswa')}
+                    />
+                    <div className="text-center py-3 border border-slate-200 text-slate-500 peer-checked:bg-slate-900 peer-checked:text-white transition-all text-sm uppercase tracking-wider font-medium rounded-xl">
+                      Siswa
+                    </div>
+                  </label>
+                  <label className="flex-1 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="guru"
+                      className="hidden peer"
+                      checked={role === 'guru'}
+                      onChange={() => setRole('guru')}
+                    />
+                    <div className="text-center py-3 border border-slate-200 text-slate-500 peer-checked:bg-slate-900 peer-checked:text-white transition-all text-sm uppercase tracking-wider font-medium rounded-xl">
+                      Guru
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <GlassButton type="submit" variant="primary" className="w-full" disabled={loading}>
+                {loading ? 'Memproses...' : 'Daftar'}
+              </GlassButton>
+            </form>
+
+            <div className="mt-8 text-center text-sm text-slate-500">
+              Sudah punya akun?{' '}
+              <Link to="/login" className="text-slate-900 underline hover:text-slate-700">
+                Masuk
+              </Link>
+            </div>
           </div>
+        </div>
+
+        <div className="hidden md:block w-1/2 relative">
+          <img
+            src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
+            alt="Abstract Gradient"
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // --- OTP VERIFICATION ---
+  return (
+    <div className="min-h-screen flex w-full font-sans">
+      <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-white">
+        <div className="w-full max-w-md">
+          {/* Back button */}
+          <button
+            onClick={() => setStep('register')}
+            className="flex items-center space-x-2 text-slate-500 hover:text-slate-900 transition-colors mb-8"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm">Kembali</span>
+          </button>
+
+          <div className="text-center mb-10">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <Mail className="w-8 h-8 text-primary" />
+            </div>
+            <h1 className="text-3xl font-heading text-slate-900 mb-3">Verifikasi Email</h1>
+            <p className="text-sm text-slate-500">
+              Kami telah mengirimkan kode 6 digit ke{' '}
+              <span className="font-semibold text-slate-900">{email}</span>
+            </p>
+          </div>
+
+          {/* OTP Input */}
+          <div className="flex justify-center gap-3 mb-8" onPaste={handlePaste}>
+            {otp.map((digit, index) => (
+              <input
+                key={index}
+                ref={el => { otpRefs.current[index] = el; }}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                onChange={e => handleOtpChange(index, e.target.value)}
+                onKeyDown={e => handleOtpKeyDown(index, e)}
+                className={`w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 transition-all outline-none
+                  ${digit
+                    ? 'border-primary bg-primary/5 text-slate-900'
+                    : 'border-slate-200 bg-white text-slate-900'
+                  }
+                  focus:border-primary focus:ring-2 focus:ring-primary/20
+                  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
+                `}
+              />
+            ))}
+          </div>
+
+          {/* Verify Button */}
+          <GlassButton
+            type="button"
+            variant="primary"
+            className="w-full mb-4"
+            disabled={loading || otp.join('').length !== 6}
+            onClick={handleVerifyOtp}
+          >
+            {loading ? 'Memverifikasi...' : 'Verifikasi'}
+          </GlassButton>
+
+          {/* Resend */}
+          <div className="text-center">
+            <button
+              onClick={handleResendCode}
+              disabled={loading}
+              className="inline-flex items-center space-x-2 text-sm text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>Kirim ulang kode</span>
+            </button>
+          </div>
+
+          <p className="mt-8 text-center text-xs text-slate-400">
+            Tidak menerima email? Periksa folder spam atau pastikan email yang Anda masukkan benar.
+          </p>
         </div>
       </div>
 
-      {/* Right Side: Image Banner */}
       <div className="hidden md:block w-1/2 relative">
-        <img 
-          src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" 
-          alt="Abstract Gradient" 
+        <img
+          src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
+          alt="Abstract Gradient"
           className="w-full h-full object-cover"
         />
       </div>
