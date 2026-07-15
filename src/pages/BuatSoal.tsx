@@ -45,6 +45,10 @@ export default function BuatSoal() {
   const parseRubrik = (text: string): RubrikLevel => {
     if (!text) return { s100: '', s75: '', s50: '', s25: '', s0: '' };
     const parts = text.split(/Skor 100:|Skor 75:|Skor 50:|Skor 25:|Skor 0:/);
+    if (parts.length === 1) {
+      // If it doesn't match the new format, put everything in s100 as fallback
+      return { s100: text.trim(), s75: '', s50: '', s25: '', s0: '' };
+    }
     return {
       s100: parts[1] ? parts[1].trim() : '',
       s75: parts[2] ? parts[2].trim() : '',
