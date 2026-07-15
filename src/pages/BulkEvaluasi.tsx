@@ -213,9 +213,10 @@ Format Output:
         });
 
         // Simpan ke tabel yang BENAR: assessment_jawaban
+        // Set siswa_id ke null agar tidak terkena error 409 Conflict (UNIQUE constraint) untuk baris kedua dsb.
         await supabase.from('assessment_jawaban').insert([{
           soal_id: id,
-          siswa_id: user?.id, // Sementara menggunakan ID guru yang mengunggah
+          siswa_id: null, 
           jawaban_verbal: row['Verbal'] || '',
           jawaban_matematik: row['Matematik'] || '',
           jawaban_grafik: row['Grafik'] || '',
