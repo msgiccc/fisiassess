@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { GlassButton } from './GlassButton';
+
 import { useAuthStore } from '../../store/authStore';
 
 export function GlassNavbar() {

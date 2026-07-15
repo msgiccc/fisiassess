@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { GlassNavbar } from '../components/ui/GlassNavbar';
 import { Link } from 'react-router-dom';
-import { PlayCircle, Star, Users } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 export default function Landing() {
   const container = {
