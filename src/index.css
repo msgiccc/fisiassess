@@ -2,61 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400..900&family=Teachers:wght@400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 min-h-screen antialiased;
-    font-family: 'Teachers', system-ui, sans-serif;
-  }
-  
-  h1, h2, h3, h4, h5, h6, .font-heading {
-    font-family: 'Lexend', sans-serif;
-    letter-spacing: -0.02em;
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-family: 'Inter', sans-serif;
   }
 }
 
 @layer components {
-  /* Flat clean style */
-  .glass-effect {
-    @apply bg-white shadow-sm;
+  .card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
 
+  .btn-primary {
+    background: #0d9488;
+    color: white;
+    padding: 10px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  
+  .btn-primary:hover {
+    background: #0f766e;
+  }
+
+  .input-field {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  
+  .input-field:focus {
+    outline: none;
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
+  }
+  
+  /* Legacy classes temporarily maintained but redirecting to new styles to prevent breakage in un-updated components */
   .glass-card {
-    @apply bg-white rounded-[2rem] p-8 md:p-12 transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)];
+    @apply card;
   }
-  
-  .glass-card:hover {
-    @apply shadow-[0_8px_30px_rgb(0,0,0,0.08)] -translate-y-1;
-  }
-  
-  .glass-button {
-    @apply bg-transparent border-2 border-primary text-primary px-6 py-2 rounded-full font-semibold transition-all duration-300 hover:bg-primary/5 tracking-wide;
-  }
-  
   .glass-button-primary {
-    @apply bg-primary text-white px-8 py-3 rounded-full transition-all duration-300 hover:bg-primary-glow font-medium shadow-md shadow-primary/20;
+    @apply btn-primary;
   }
-  
-  .glass-button-secondary {
-    @apply bg-secondary text-white px-8 py-3 rounded-full transition-all duration-300 hover:bg-secondary-glow font-medium shadow-md shadow-secondary/20;
-  }
-
   .glass-input {
-    @apply bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all;
+    @apply input-field;
   }
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.4);
 }

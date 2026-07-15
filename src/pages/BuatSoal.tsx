@@ -143,7 +143,7 @@ export default function BuatSoal() {
 
           <GlassCard className="space-y-6">
             <h2 className="text-xl font-semibold border-b border-slate-200 pb-4">Kunci Jawaban 4 Representasi</h2>
-            <p className="text-sm text-slate-500 -mt-2 mb-4">Kunci ini akan digunakan AI untuk mengevaluasi jawaban siswa.</p>
+            <p className="text-sm text-slate-500 -mt-2 mb-4">Kunci ini akan digunakan oleh sistem untuk mengevaluasi jawaban siswa.</p>
 
             <div className="space-y-6">
               <div>

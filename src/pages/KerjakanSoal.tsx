@@ -56,7 +56,7 @@ export default function KerjakanSoal() {
     if (!user || !soal) return;
     
     setIsSubmitting(true);
-    const toastId = toast.loading('Sedang mengevaluasi jawaban dengan AI... (Ini mungkin memakan waktu beberapa detik)');
+    const toastId = toast.loading('Sedang memproses penilaian otomatis... (Ini mungkin memakan waktu beberapa detik)');
     
     try {
       // Panggil OpenRouter API untuk ke-4 representasi secara paralel

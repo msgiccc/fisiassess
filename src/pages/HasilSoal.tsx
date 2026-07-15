@@ -84,7 +84,7 @@ export default function HasilSoal() {
           <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Dashboard
         </Link>
 
-        <h1 className="text-3xl font-bold mb-2">Hasil Evaluasi AI: {soal?.judul}</h1>
+        <h1 className="text-3xl font-bold mb-2">Hasil Evaluasi: {soal?.judul}</h1>
         <p className="text-slate-500 mb-8">Dianalisis secara otomatis berdasarkan 4 representasi fisika.</p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
