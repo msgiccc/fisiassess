@@ -29,10 +29,10 @@ export function GlassSidebar() {
   const menu = user?.role === 'guru' ? menuGuru : menuSiswa;
 
   return (
-    <aside className="w-64 bg-white min-h-[calc(100vh-2rem)] m-4 rounded-none md:rounded-lg shadow-sm border border-slate-200 p-6 flex flex-col hidden md:flex">
+    <aside className="w-64 bg-white min-h-[calc(100vh-2rem)] m-4 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-6 flex flex-col hidden md:flex">
       <div className="mb-10 text-center">
-        <Link to="/" className="text-2xl font-bold font-heading uppercase tracking-tight text-slate-900">
-          Fisi<span className="text-slate-500">Assess</span>
+        <Link to="/" className="text-2xl font-bold font-heading tracking-tight text-slate-900">
+          Fisi<span className="text-primary">Assess</span>
         </Link>
       </div>
 
@@ -46,42 +46,42 @@ export function GlassSidebar() {
             <button
               key={item.name}
               onClick={() => toast('Fitur ini masih dalam tahap pengembangan.', { icon: '🚧' })}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-none transition-all text-slate-500 hover:text-slate-900 hover:bg-slate-50 text-left"
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all text-slate-500 hover:text-primary hover:bg-primary/5 text-left"
             >
               <Icon className="w-5 h-5" />
-              <span className="font-medium text-sm uppercase tracking-wider">{item.name}</span>
+              <span className="font-semibold text-sm tracking-wide">{item.name}</span>
             </button>
           ) : (
             <Link
               key={item.name}
               to={item.path}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-none transition-all ${
+              className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${
                 isActive
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-primary text-white shadow-md shadow-primary/20'
+                  : 'text-slate-500 hover:text-primary hover:bg-primary/5'
               }`}
             >
               <Icon className="w-5 h-5" />
-              <span className="font-medium text-sm uppercase tracking-wider">{item.name}</span>
+              <span className="font-semibold text-sm tracking-wide">{item.name}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="pt-6 border-t border-slate-200 mt-6">
+      <div className="pt-6 border-t border-slate-100 mt-6">
         <div className="flex items-center space-x-3 px-4 mb-6">
-          <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center font-bold text-white shadow-sm">
+          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-white shadow-md shadow-primary/20">
             {user?.name.charAt(0) || 'U'}
           </div>
           <div className="overflow-hidden">
-            <p className="text-sm font-bold text-slate-900 truncate uppercase">{user?.name || 'User'}</p>
+            <p className="text-sm font-bold text-slate-900 truncate capitalize">{user?.name || 'User'}</p>
             <p className="text-xs text-slate-500 uppercase tracking-widest">{user?.role || 'Guest'}</p>
           </div>
         </div>
         
         <button
           onClick={handleLogout}
-          className="flex items-center space-x-3 px-4 py-3 w-full rounded-none text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all uppercase tracking-wider text-sm font-medium"
+          className="flex items-center space-x-3 px-4 py-3 w-full rounded-xl text-slate-500 hover:text-red-500 hover:bg-red-50 transition-all tracking-wide text-sm font-semibold"
         >
           <LogOut className="w-5 h-5" />
           <span>Keluar</span>
