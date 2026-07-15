@@ -104,7 +104,8 @@ export default function Register() {
         navigate('/dashboard-siswa');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Kode verifikasi salah.');
+      const msg = typeof error?.message === 'string' ? error.message : error?.message?.message || 'Kode verifikasi salah. Silakan coba lagi.';
+      toast.error(msg);
       setOtp(['', '', '', '', '', '']);
       otpRefs.current[0]?.focus();
     } finally {
@@ -122,7 +123,8 @@ export default function Register() {
       if (error) throw error;
       toast.success('Kode verifikasi baru telah dikirim!');
     } catch (error: any) {
-      toast.error(error.message || 'Gagal mengirim ulang kode.');
+      const msg = typeof error?.message === 'string' ? error.message : error?.message?.message || 'Gagal mengirim ulang kode.';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

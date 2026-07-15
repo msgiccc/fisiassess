@@ -13,7 +13,6 @@ export default function Pengaturan() {
   const [loadingData, setLoadingData] = useState(true);
   const [form, setForm] = useState({
     nama: '',
-    nim: '',
   });
   const [passwordForm, setPasswordForm] = useState({
     current: '',
@@ -36,7 +35,6 @@ export default function Pengaturan() {
       if (error) throw error;
       setForm({
         nama: data?.nama || user?.name || '',
-        nim: data?.nim || '',
       });
     } catch (e: any) {
       console.error(e);
@@ -56,7 +54,7 @@ export default function Pengaturan() {
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ nama: form.nama.trim(), nim: form.nim.trim() || null })
+        .update({ nama: form.nama.trim() })
         .eq('id', user?.id);
 
       if (error) throw error;
@@ -129,19 +127,6 @@ export default function Pengaturan() {
                   className="glass-input w-full"
                   placeholder="Nama Anda"
                   required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-2">
-                  NIM / NIP <span className="text-slate-400 font-normal">(opsional)</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.nim}
-                  onChange={e => setForm({ ...form, nim: e.target.value })}
-                  className="glass-input w-full"
-                  placeholder="Nomor Induk"
                 />
               </div>
 
