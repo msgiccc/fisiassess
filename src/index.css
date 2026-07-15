@@ -2,17 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400..900&family=Teachers:wght@400..800&display=swap');
 
 @layer base {
   body {
     @apply bg-slate-50 text-slate-900 min-h-screen antialiased;
-    font-family: 'Lora', serif;
+    font-family: 'Teachers', system-ui, sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6, .font-heading {
-    font-family: 'Playfair Display', serif;
-    letter-spacing: -0.01em;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 

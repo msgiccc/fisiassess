@@ -25,8 +25,8 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Lora', 'serif'],
-        heading: ['"Playfair Display"', 'serif'],
+        sans: ['Teachers', 'sans-serif'],
+        heading: ['Outfit', 'sans-serif'],
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
