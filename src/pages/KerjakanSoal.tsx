@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
@@ -9,7 +9,7 @@ import { useAuthStore } from '../store/authStore';
 import { evaluateAnswer } from '../lib/openrouter';
 import toast from 'react-hot-toast';
 import Latex from 'react-latex-next';
-import { MathKeyboard } from '../components/ui/MathKeyboard';
+import 'mathlive';
 
 export default function KerjakanSoal() {
   const { id } = useParams();
@@ -26,26 +26,6 @@ export default function KerjakanSoal() {
     grafik: '',
     visual: '',
   });
-
-  const mathInputRef = useRef<HTMLTextAreaElement>(null);
-
-  const insertSymbolToMath = (symbol: string) => {
-    const el = mathInputRef.current;
-    if (!el) {
-      setJawaban(prev => ({ ...prev, matematik: prev.matematik + symbol }));
-      return;
-    }
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    const val = jawaban.matematik;
-    const newVal = val.substring(0, start) + symbol + val.substring(end);
-    setJawaban(prev => ({ ...prev, matematik: newVal }));
-    
-    setTimeout(() => {
-      el.focus();
-      el.setSelectionRange(start + symbol.length, start + symbol.length);
-    }, 0);
-  };
 
   useEffect(() => {
     if (id) fetchSoal(id);
@@ -179,9 +159,13 @@ export default function KerjakanSoal() {
             <label className="block text-lg font-medium text-slate-900 mb-2 flex items-center">
               <span className="w-3 h-3 rounded-full bg-secondary-glow mr-3"></span> 2. Representasi Matematik
             </label>
-            <p className="text-sm text-slate-500 mb-4">Tuliskan rumus hukum Newton dan hitung nilai percepatan balok (g = 10 m/s²).</p>
-            <MathKeyboard onInsert={insertSymbolToMath} />
-            <textarea ref={mathInputRef} name="matematik" value={jawaban.matematik} onChange={handleChange} className="glass-input w-full min-h-[120px]" placeholder="Ketikkan simbol atau rumus Anda..." required />
+            <p className="text-sm text-slate-500 mb-4">Tuliskan rumus dan perhitungan matematika. Anda bisa menggunakan *Virtual Keyboard* yang akan muncul saat Anda mengetik di bawah ini.</p>
+            <math-field 
+              onInput={(e: any) => setJawaban({ ...jawaban, matematik: e.target.value })}
+              style={{ width: '100%', minHeight: '120px', fontSize: '1.25rem', padding: '16px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.7)', border: '1px solid #e2e8f0' }}
+            >
+              {jawaban.matematik}
+            </math-field>
           </GlassCard>
           )}
 
