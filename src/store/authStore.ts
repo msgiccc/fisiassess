@@ -16,8 +16,6 @@ interface AuthState {
   setUser: (user: User | null) => void;
   logout: () => Promise<void>;
   initialize: () => Promise<void>;
-  logout: () => Promise<void>;
-  initialize: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
