@@ -25,8 +25,8 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Montserrat', 'system-ui', 'sans-serif'],
-        heading: ['Oswald', 'sans-serif'],
+        sans: ['Lora', 'serif'],
+        heading: ['"Playfair Display"', 'serif'],
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

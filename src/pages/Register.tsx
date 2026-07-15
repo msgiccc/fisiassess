@@ -1,20 +1,15 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
-import { MailCheck } from 'lucide-react';
 
 export default function Register() {
-  const [role, setRole] = useState<'guru' | 'siswa'>('siswa');
-  const [name, setName] = useState('');
-  const [nim, setNim] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState<'guru' | 'siswa'>('siswa');
   const [loading, setLoading] = useState(false);
-  const [verificationRequired, setVerificationRequired] = useState(false);
-  
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -22,32 +17,21 @@ export default function Register() {
     setLoading(true);
 
     try {
-      // Register with Supabase Auth and pass profile data as metadata
-      // A trigger in Supabase will automatically insert this into the profiles table
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             nama: name,
-            nim: nim,
-            role: role
+            role: role,
           }
         }
       });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // If session is null, it means email verification is required
-        if (!authData.session) {
-          setVerificationRequired(true);
-        } else {
-          // If somehow email verification is off, go to login
-          toast.success('Pendaftaran berhasil! Silakan login.');
-          navigate('/login');
-        }
-      }
+      if (error) throw error;
+      
+      toast.success('Registrasi berhasil! Silakan periksa email Anda untuk verifikasi.');
+      navigate('/login');
     } catch (error: any) {
       toast.error(error.message || 'Gagal mendaftar.');
     } finally {
@@ -55,128 +39,92 @@ export default function Register() {
     }
   };
 
-  if (verificationRequired) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6 relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-hero-glow rounded-full blur-[100px] opacity-40 pointer-events-none" />
-        
-        <GlassCard className="w-full max-w-md relative z-10 text-center">
-          <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
-              <MailCheck className="text-slate-900 w-10 h-10" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">Verifikasi Email</h2>
-          <p className="text-slate-600 mb-8 leading-relaxed">
-            Link verifikasi telah dikirimkan ke <strong className="text-slate-900">{email}</strong>. 
-            Silakan cek kotak masuk (atau spam) email Anda dan klik link tersebut untuk mengaktifkan akun.
-          </p>
-          
-          <div className="space-y-4">
-            <GlassButton 
-              variant="primary" 
-              className="w-full"
-              onClick={() => navigate('/login')}
-            >
-              Jika sudah diverifikasi, klik di sini untuk Login
-            </GlassButton>
-            <button 
-              onClick={() => setVerificationRequired(false)}
-              className="text-slate-500 text-sm hover:text-slate-900 transition-colors"
-            >
-              Ganti email pendaftaran
-            </button>
-          </div>
-        </GlassCard>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6 relative font-sans">
-      
-      <GlassCard className="w-full max-w-md relative z-10">
-        <div className="text-center mb-8">
-          <Link to="/" className="text-3xl font-bold text-slate-900 tracking-tight inline-block mb-2">
-            Fisi<span className="text-slate-900">Assess.</span>
-          </Link>
-          <h2 className="text-xl text-slate-500">Buat akun baru</h2>
-        </div>
-
-        <form onSubmit={handleRegister} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-600 mb-2">Daftar Sebagai</label>
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setRole('siswa')}
-                className={`py-2 rounded-xl border transition-all ${role === 'siswa' ? 'bg-primary-glow/20 border-primary-glow text-slate-900' : 'glass-effect text-slate-500 hover:text-slate-900'}`}
-              >
-                Siswa
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole('guru')}
-                className={`py-2 rounded-xl border transition-all ${role === 'guru' ? 'bg-secondary-glow/20 border-secondary-glow text-slate-900' : 'glass-effect text-slate-500 hover:text-slate-900'}`}
-              >
-                Guru
-              </button>
-            </div>
+    <div className="min-h-screen flex w-full font-sans">
+      {/* Left Side: Register Form */}
+      <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-white">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-10">
+            <h1 className="text-3xl font-heading text-slate-900 mb-3">Create an Account</h1>
+            <p className="text-sm text-slate-500">Enter your details to register</p>
           </div>
 
-          <div className="space-y-4">
-            <div>
+          <form onSubmit={handleRegister} className="space-y-6">
+            <div className="space-y-4">
               <input 
                 type="text" 
                 placeholder="Nama Lengkap" 
-                className="glass-input w-full"
+                className="glass-input w-full text-center" 
                 value={name}
                 onChange={e => setName(e.target.value)}
                 required 
               />
-            </div>
-            <div>
-              <input 
-                type="text" 
-                placeholder={role === 'siswa' ? "NIM / NISN" : "NIP"} 
-                className="glass-input w-full"
-                value={nim}
-                onChange={e => setNim(e.target.value)}
-                required 
-              />
-            </div>
-            <div>
               <input 
                 type="email" 
                 placeholder="Email" 
-                className="glass-input w-full"
+                className="glass-input w-full text-center" 
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required 
               />
-            </div>
-            <div>
               <input 
                 type="password" 
-                placeholder="Password (min. 6 karakter)" 
-                className="glass-input w-full"
+                placeholder="Password" 
+                className="glass-input w-full text-center" 
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required 
-                minLength={6}
               />
+              
+              <div className="flex gap-4 pt-2">
+                <label className="flex-1 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="siswa"
+                    className="hidden peer"
+                    checked={role === 'siswa'}
+                    onChange={() => setRole('siswa')}
+                  />
+                  <div className="text-center py-3 border border-slate-200 text-slate-500 peer-checked:bg-slate-900 peer-checked:text-white transition-all text-sm uppercase tracking-wider font-medium">
+                    Siswa
+                  </div>
+                </label>
+                <label className="flex-1 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="guru"
+                    className="hidden peer"
+                    checked={role === 'guru'}
+                    onChange={() => setRole('guru')}
+                  />
+                  <div className="text-center py-3 border border-slate-200 text-slate-500 peer-checked:bg-slate-900 peer-checked:text-white transition-all text-sm uppercase tracking-wider font-medium">
+                    Guru
+                  </div>
+                </label>
+              </div>
             </div>
+
+            <GlassButton type="submit" variant="primary" className="w-full" disabled={loading}>
+              {loading ? 'Memproses...' : 'Sign Up'}
+            </GlassButton>
+          </form>
+
+          <div className="mt-8 text-center text-sm text-slate-500">
+            Already have an account? <Link to="/login" className="text-slate-900 underline hover:text-slate-700">Log in</Link>
           </div>
+        </div>
+      </div>
 
-          <GlassButton type="submit" variant="primary" className="w-full text-lg mt-4" disabled={loading}>
-            {loading ? 'Memproses...' : 'Daftar'}
-          </GlassButton>
-        </form>
-
-        <p className="mt-8 text-center text-slate-500 text-sm">
-          Sudah punya akun? <Link to="/login" className="text-slate-900 hover:underline">Masuk di sini</Link>
-        </p>
-      </GlassCard>
+      {/* Right Side: Image Banner */}
+      <div className="hidden md:block w-1/2 relative">
+        <img 
+          src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" 
+          alt="Abstract Gradient" 
+          className="w-full h-full object-cover"
+        />
+      </div>
     </div>
   );
 }
