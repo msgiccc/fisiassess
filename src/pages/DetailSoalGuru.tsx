@@ -129,17 +129,27 @@ export default function DetailSoalGuru() {
                     <td colSpan={7} className="py-8 text-center text-slate-500">Belum ada siswa yang mengerjakan tugas ini.</td>
                   </tr>
                 ) : (
-                  jawabanList.map((j) => (
-                    <tr key={j.id} className="border-b border-white/5 hover:bg-slate-50 transition-colors">
-                      <td className="py-4 px-4 font-medium">{j.profiles?.nama || 'Siswa Tanpa Nama'}</td>
-                      <td className="py-4 px-4 text-slate-500">{j.profiles?.nim || '-'}</td>
-                      <td className="py-4 px-4 text-center text-slate-900">{j.skor_verbal}</td>
-                      <td className="py-4 px-4 text-center text-slate-700">{j.skor_matematik}</td>
-                      <td className="py-4 px-4 text-center text-accent">{j.skor_grafik}</td>
-                      <td className="py-4 px-4 text-center text-emerald-400">{j.skor_visual}</td>
-                      <td className="py-4 px-4 text-center font-bold text-slate-900 text-lg">{j.totalSkor}</td>
-                    </tr>
-                  ))
+                  jawabanList.map((j) => {
+                    let namaExcel = null;
+                    if (!j.profiles?.nama && j.feedback) {
+                      try {
+                        const parsed = JSON.parse(j.feedback);
+                        if (parsed.nama_excel) namaExcel = parsed.nama_excel + ' (Excel)';
+                      } catch (e) {}
+                    }
+                    
+                    return (
+                      <tr key={j.id} className="border-b border-white/5 hover:bg-slate-50 transition-colors">
+                        <td className="py-4 px-4 font-medium">{j.profiles?.nama || namaExcel || 'Siswa Tanpa Nama'}</td>
+                        <td className="py-4 px-4 text-slate-500">{j.profiles?.nim || '-'}</td>
+                        <td className="py-4 px-4 text-center text-slate-900">{j.skor_verbal}</td>
+                        <td className="py-4 px-4 text-center text-slate-700">{j.skor_matematik}</td>
+                        <td className="py-4 px-4 text-center text-accent">{j.skor_grafik}</td>
+                        <td className="py-4 px-4 text-center text-emerald-400">{j.skor_visual}</td>
+                        <td className="py-4 px-4 text-center font-bold text-slate-900 text-lg">{j.totalSkor}</td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
