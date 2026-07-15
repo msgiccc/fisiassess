@@ -31,8 +31,8 @@ OUTPUT HARUS HANYA BERUPA JSON VALID TANPA FORMATTING MARKDOWN. Format:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        // Menggunakan Gemini 2.0 Flash versi gratis agar tidak terkena limit saldo 402
-        model: "google/gemini-2.0-flash-lite-preview-02-05:free", 
+        // Menggunakan Llama 3.3 70B versi gratis karena Gemini versi gratis sedang dinonaktifkan di OpenRouter
+        model: "meta-llama/llama-3.3-70b-instruct:free", 
         messages: [{ role: "user", content: prompt }],
         temperature: 0.1, // Suhu rendah agar penilaian konsisten
       }),
