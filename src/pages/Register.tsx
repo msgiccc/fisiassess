@@ -13,16 +13,15 @@ export default function Register() {
   const [role, setRole] = useState<'guru' | 'siswa'>('siswa');
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'register' | 'verify'>('register');
-  const OTP_LENGTH = 7;
-  const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [otp, setOtp] = useState('');
+  const otpRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const initialize = useAuthStore(state => state.initialize);
 
-  // Focus first OTP input when entering verify step
+  // Focus OTP input when entering verify step
   useEffect(() => {
     if (step === 'verify') {
-      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+      setTimeout(() => otpRef.current?.focus(), 100);
     }
   }, [step]);
 
@@ -48,41 +47,10 @@ export default function Register() {
     }
   };
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
-    const newOtp = [...otp];
-    newOtp[index] = value.slice(-1);
-    setOtp(newOtp);
-
-    // Auto-advance to next input
-    if (value && index < OTP_LENGTH - 1) {
-      otpRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
-    if (e.key === 'Enter') {
-      handleVerifyOtp();
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH);
-    if (pasted.length === OTP_LENGTH) {
-      const newOtp = pasted.split('');
-      setOtp(newOtp);
-      otpRefs.current[OTP_LENGTH - 1]?.focus();
-    }
-  };
-
   const handleVerifyOtp = async () => {
-    const token = otp.join('');
-    if (token.length !== OTP_LENGTH) {
-      toast.error('Masukkan kode verifikasi dengan benar.');
+    const token = otp.trim();
+    if (token.length < 4) {
+      toast.error('Masukkan kode verifikasi yang benar.');
       return;
     }
 
@@ -107,8 +75,8 @@ export default function Register() {
     } catch (error: any) {
       const msg = typeof error?.message === 'string' ? error.message : error?.message?.message || 'Kode verifikasi salah. Silakan coba lagi.';
       toast.error(msg);
-      setOtp(['', '', '', '', '', '']);
-      otpRefs.current[0]?.focus();
+      setOtp('');
+      otpRef.current?.focus();
     } finally {
       setLoading(false);
     }
@@ -249,28 +217,24 @@ export default function Register() {
             </p>
           </div>
 
-          {/* OTP Input */}
-          <div className="flex justify-center gap-3 mb-8" onPaste={handlePaste}>
-            {otp.map((digit, index) => (
+          {/* Flexible OTP Input */}
+          <div className="mb-8">
+            <div className="flex justify-center">
               <input
-                key={index}
-                ref={el => { otpRefs.current[index] = el; }}
+                ref={otpRef}
                 type="text"
                 inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={e => handleOtpChange(index, e.target.value)}
-                onKeyDown={e => handleOtpKeyDown(index, e)}
-                className={`w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 transition-all outline-none
-                  ${digit
-                    ? 'border-primary bg-primary/5 text-slate-900'
-                    : 'border-slate-200 bg-white text-slate-900'
-                  }
-                  focus:border-primary focus:ring-2 focus:ring-primary/20
-                  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
-                `}
+                value={otp}
+                onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                onKeyDown={e => { if (e.key === 'Enter') handleVerifyOtp(); }}
+                placeholder="000000"
+                className="glass-input max-w-xs text-center text-2xl font-bold tracking-[0.5em] py-4"
+                autoComplete="one-time-code"
               />
-            ))}
+            </div>
+            <p className="text-center text-xs text-slate-400 mt-2">
+              Masukkan kode verifikasi dari email Anda
+            </p>
           </div>
 
           {/* Verify Button */}
@@ -278,7 +242,7 @@ export default function Register() {
             type="button"
             variant="primary"
             className="w-full mb-4"
-            disabled={loading || otp.join('').length !== OTP_LENGTH}
+            disabled={loading || otp.trim().length < 4}
             onClick={handleVerifyOtp}
           >
             {loading ? 'Memverifikasi...' : 'Verifikasi'}
