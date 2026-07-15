@@ -6,6 +6,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { ArrowLeft, Upload, Play, CheckCircle, FileSpreadsheet, Download, Search, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
+import { evaluateAnswer } from '../lib/openrouter';
 
 interface ExcelDataRow {
   'Nama Siswa': string;
@@ -102,38 +103,22 @@ export default function BulkEvaluasi() {
       const row = excelData[i];
       
       try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'llama3-70b-8192',
-            messages: [
-              {
-                role: 'system',
-                content: `Anda adalah asisten sistem penilaian esai fisika. Evaluasi jawaban berikut berdasarkan rubrik. Kembalikan HANYA JSON berformat: {"verbal":{"skor":number,"feedback":"..."},"matematik":{"skor":number,"feedback":"..."},"grafik":{"skor":number,"feedback":"..."},"visual":{"skor":number,"feedback":"..."},"total":number}`
-              },
-              {
-                role: 'user',
-                content: `Soal: ${soal.soal_text}\nKunci Verbal: ${soal.kunci_verbal}\nKunci Matematik: ${soal.kunci_matematik}\nKunci Grafik: ${soal.kunci_grafik}\nKunci Visual: ${soal.kunci_visual}\n\nJawaban Siswa:\nVerbal: ${row['Verbal']}\nMatematik: ${row['Matematik']}\nGrafik: ${row['Grafik']}\nVisual: ${row['Visual']}`
-              }
-            ],
-            response_format: { type: "json_object" }
-          })
-        });
+        const [hasilVerbal, hasilMatematik, hasilGrafik, hasilVisual] = await Promise.all([
+          evaluateAnswer(soal.soal_text, soal.kunci_verbal, row['Verbal'] || '', "Verbal"),
+          evaluateAnswer(soal.soal_text, soal.kunci_matematik, row['Matematik'] || '', "Matematik"),
+          evaluateAnswer(soal.soal_text, soal.kunci_grafik, row['Grafik'] || '', "Grafik"),
+          evaluateAnswer(soal.soal_text, soal.kunci_visual, row['Visual'] || '', "Visual / Fisik"),
+        ]);
 
-        const data = await response.json();
-        const evalResult = JSON.parse(data.choices[0].message.content);
+        const totalSkor = Math.round((hasilVerbal.skor + hasilMatematik.skor + hasilGrafik.skor + hasilVisual.skor) / 4);
 
         // Siapkan feedback JSON string, disisipkan nama dari Excel agar DetailSoalGuru bisa membacanya
         const feedbackString = JSON.stringify({
           nama_excel: row['Nama Siswa'],
-          verbal: evalResult.verbal?.feedback || '-',
-          matematik: evalResult.matematik?.feedback || '-',
-          grafik: evalResult.grafik?.feedback || '-',
-          visual: evalResult.visual?.feedback || '-',
+          verbal: hasilVerbal.feedback || '-',
+          matematik: hasilMatematik.feedback || '-',
+          grafik: hasilGrafik.feedback || '-',
+          visual: hasilVisual.feedback || '-',
         });
 
         // Simpan ke tabel yang BENAR: assessment_jawaban
@@ -144,25 +129,25 @@ export default function BulkEvaluasi() {
           jawaban_matematik: row['Matematik'] || '',
           jawaban_grafik: row['Grafik'] || '',
           jawaban_visual: row['Visual'] || '',
-          skor_verbal: evalResult.verbal?.skor || 0,
-          skor_matematik: evalResult.matematik?.skor || 0,
-          skor_grafik: evalResult.grafik?.skor || 0,
-          skor_visual: evalResult.visual?.skor || 0,
+          skor_verbal: hasilVerbal.skor || 0,
+          skor_matematik: hasilMatematik.skor || 0,
+          skor_grafik: hasilGrafik.skor || 0,
+          skor_visual: hasilVisual.skor || 0,
           feedback: feedbackString
         }]);
 
         currentResults.push({
           nama: row['Nama Siswa'],
-          skor_verbal: evalResult.verbal?.skor || 0,
-          skor_matematik: evalResult.matematik?.skor || 0,
-          skor_grafik: evalResult.grafik?.skor || 0,
-          skor_visual: evalResult.visual?.skor || 0,
-          skor_total: evalResult.total || Math.round(((evalResult.verbal?.skor || 0) + (evalResult.matematik?.skor || 0) + (evalResult.grafik?.skor || 0) + (evalResult.visual?.skor || 0)) / 4),
+          skor_verbal: hasilVerbal.skor || 0,
+          skor_matematik: hasilMatematik.skor || 0,
+          skor_grafik: hasilGrafik.skor || 0,
+          skor_visual: hasilVisual.skor || 0,
+          skor_total: totalSkor,
           feedback: {
-            verbal: evalResult.verbal?.feedback || '-',
-            matematik: evalResult.matematik?.feedback || '-',
-            grafik: evalResult.grafik?.feedback || '-',
-            visual: evalResult.visual?.feedback || '-',
+            verbal: hasilVerbal.feedback || '-',
+            matematik: hasilMatematik.feedback || '-',
+            grafik: hasilGrafik.feedback || '-',
+            visual: hasilVisual.feedback || '-',
           },
           status: 'Sukses'
         });
