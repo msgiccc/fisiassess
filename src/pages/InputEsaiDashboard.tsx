@@ -4,14 +4,17 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { supabase } from '../lib/supabase';
-import { PlusCircle, FileText, ChevronRight, Edit, ArrowRightLeft } from 'lucide-react';
+import { PlusCircle, FileText, ChevronRight, Edit, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
 
 export default function InputEsaiDashboard() {
   const { user } = useAuthStore();
   const [rubriks, setRubriks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedRubrik, setSelectedRubrik] = useState<any>(null);
 
   useEffect(() => {
     fetchRubriks();
@@ -36,19 +39,28 @@ export default function InputEsaiDashboard() {
     }
   };
 
-  const moveToOnline = async (id: string) => {
-    if (!window.confirm('Yakin ingin memindahkan rubrik ini menjadi Soal Online biasa?')) return;
+  const handleCopyClick = (rubrik: any) => {
+    setSelectedRubrik(rubrik);
+    setModalOpen(true);
+  };
+
+  const copyToOnline = async () => {
+    if (!selectedRubrik) return;
     try {
+      const { id, created_at, ...rest } = selectedRubrik;
       const { error } = await supabase
         .from('assessment_soal')
-        .update({ topik: 'Umum' })
-        .eq('id', id);
+        .insert([{ 
+          ...rest, 
+          topik: 'Umum',
+          judul: `${rest.judul} (Salinan Online)`
+        }]);
       
       if (error) throw error;
-      toast.success('Rubrik berhasil dipindahkan ke mode Soal Online!');
-      fetchRubriks();
+      toast.success('Rubrik berhasil disalin ke mode Soal Online!');
+      setModalOpen(false);
     } catch (e: any) {
-      toast.error('Gagal memindahkan: ' + e.message);
+      toast.error('Gagal menyalin: ' + e.message);
     }
   };
 
@@ -110,11 +122,11 @@ export default function InputEsaiDashboard() {
                   </div>
                   <div className="flex items-center gap-3">
                     <button 
-                      onClick={() => moveToOnline(rubrik.id)}
+                      onClick={() => handleCopyClick(rubrik)}
                       className="p-2 text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
-                      title="Pindahkan ke Soal Online"
+                      title="Salin ke Soal Online"
                     >
-                      <ArrowRightLeft className="w-5 h-5" />
+                      <Copy className="w-5 h-5" />
                     </button>
                     <Link 
                       to={`/input-esai/edit/${rubrik.id}`}
@@ -133,6 +145,15 @@ export default function InputEsaiDashboard() {
           )}
         </GlassCard>
       </div>
+
+      <ConfirmModal
+        isOpen={modalOpen}
+        title="Salin ke Soal Online"
+        message={`Apakah Anda yakin ingin membuat salinan dari rubrik "${selectedRubrik?.judul}" menjadi soal evaluasi online interaktif biasa?`}
+        confirmText="Salin Soal"
+        onConfirm={copyToOnline}
+        onCancel={() => setModalOpen(false)}
+      />
     </DashboardLayout>
   );
 }

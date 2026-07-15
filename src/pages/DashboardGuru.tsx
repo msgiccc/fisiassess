@@ -3,15 +3,18 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { GlassCard } from '../components/ui/GlassCard';
 import { useAuthStore } from '../store/authStore';
 import { supabase } from '../lib/supabase';
-import { Users, BookOpen, CheckCircle, Edit, ArrowRightLeft } from 'lucide-react';
+import { Users, BookOpen, CheckCircle, Edit, Copy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
 
 export default function DashboardGuru() {
   const { user } = useAuthStore();
   const [soalList, setSoalList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalSiswa: 0, rataRata: 0 });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedSoal, setSelectedSoal] = useState<any>(null);
 
   useEffect(() => {
     if (user?.id) {
@@ -60,19 +63,29 @@ export default function DashboardGuru() {
     }
   };
 
-  const moveToManual = async (id: string) => {
-    if (!window.confirm('Yakin ingin memindahkan soal ini ke mode Input Esai Manual? Soal ini akan hilang dari Dashboard Online.')) return;
+  const handleCopyClick = (soal: any) => {
+    setSelectedSoal(soal);
+    setModalOpen(true);
+  };
+
+  const copyToManual = async () => {
+    if (!selectedSoal) return;
     try {
+      const { id, created_at, ...rest } = selectedSoal;
       const { error } = await supabase
         .from('assessment_soal')
-        .update({ topik: 'MANUAL_EVAL', kelas_id: null })
-        .eq('id', id);
+        .insert([{ 
+          ...rest, 
+          topik: 'MANUAL_EVAL', 
+          kelas_id: null,
+          judul: `${rest.judul} (Salinan Manual)`
+        }]);
       
       if (error) throw error;
-      toast.success('Soal berhasil dipindahkan ke mode Input Esai Manual!');
-      fetchSoal();
+      toast.success('Soal berhasil disalin ke mode Input Esai Manual!');
+      setModalOpen(false);
     } catch (e: any) {
-      toast.error('Gagal memindahkan: ' + e.message);
+      toast.error('Gagal menyalin: ' + e.message);
     }
   };
 
@@ -156,11 +169,11 @@ export default function DashboardGuru() {
                     </td>
                     <td className="py-4 px-4 text-right space-x-3">
                       <button 
-                        onClick={() => moveToManual(soal.id)}
+                        onClick={() => handleCopyClick(soal)}
                         className="text-amber-600 hover:text-amber-800 transition-colors"
-                        title="Pindahkan ke Input Manual"
+                        title="Salin ke Input Manual"
                       >
-                        <ArrowRightLeft className="w-4 h-4 inline" />
+                        <Copy className="w-4 h-4 inline" />
                       </button>
                       <Link 
                         to={`/edit-soal/${soal.id}`}
@@ -183,6 +196,15 @@ export default function DashboardGuru() {
           </table>
         </div>
       </GlassCard>
+
+      <ConfirmModal
+        isOpen={modalOpen}
+        title="Salin ke Input Manual"
+        message={`Apakah Anda yakin ingin membuat salinan dari soal "${selectedSoal?.judul}" untuk keperluan Input Esai Manual? Salinan ini tidak akan memengaruhi soal aslinya.`}
+        confirmText="Salin Soal"
+        onConfirm={copyToManual}
+        onCancel={() => setModalOpen(false)}
+      />
     </DashboardLayout>
   );
 }
